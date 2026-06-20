@@ -104,6 +104,15 @@ const buildCategoryTree = (items: Category[]): CategoryNode[] => {
   return sortTree(roots);
 };
 
+const getNodeAndDescendants = (node: CategoryNode): CategoryNode[] => {
+  const result: CategoryNode[] = [node];
+  const collect = (n: CategoryNode) => {
+    n.children.forEach((child) => { result.push(child); collect(child); });
+  };
+  collect(node);
+  return result;
+};
+
 const firstChildOf = (items: Category[], parentId: number) =>
   items
     .filter((item) => !item.deleted && item.parentId === parentId)
@@ -138,6 +147,9 @@ export default function AdminCategoriesPage() {
   const [createForm, setCreateForm] = useState<CreateFormState>(emptyCreateForm());
   const [editing, setEditing] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<CategoryNode | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [savePromptOpen, setSavePromptOpen] = useState(false);
   const initialFormRef = useRef<CreateFormState>(emptyCreateForm());
   const saveActionRef = useRef<(() => Promise<void>) | null>(null);
@@ -274,15 +286,58 @@ export default function AdminCategoriesPage() {
     await saveCategory();
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Xóa danh mục này?")) return;
-    try { await categoriesApi.adminDelete(id); toast.success("Đã xóa"); load(); }
-    catch { toast.error("Không thể xóa"); }
+  const handleDeleteClick = (node: CategoryNode) => {
+    setDeleteTarget(node);
+    setDeleteOpen(true);
   };
 
-  const handleRestore = async (id: number) => {
-    try { await categoriesApi.adminRestore(id); toast.success("Đã khôi phục"); load(); }
-    catch (err: unknown) {
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const all = getNodeAndDescendants(deleteTarget);
+      for (const cat of [...all].reverse()) {
+        await categoriesApi.adminDelete(cat.id);
+      }
+      const count = all.length;
+      toast.success(count > 1
+        ? `Đã chuyển ${count} danh mục vào thùng rác`
+        : `Đã chuyển "${deleteTarget.name}" vào thùng rác`);
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+      load();
+    } catch {
+      toast.error("Không thể xóa danh mục");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleRestore = async (c: Category) => {
+    const byId = categoryIndex(categories);
+    if (c.parentId != null) {
+      const parent = byId.get(c.parentId);
+      if (parent?.deleted) {
+        if (parent.parentId == null) {
+          toast.error(`Không thể khôi phục: danh mục chính "${parent.name}" chưa được khôi phục`);
+        } else {
+          toast.error(`Không thể khôi phục: danh mục cha "${parent.name}" chưa được khôi phục`);
+        }
+        return;
+      }
+      if (parent && parent.parentId != null) {
+        const grandparent = byId.get(parent.parentId);
+        if (grandparent?.deleted) {
+          toast.error(`Không thể khôi phục: danh mục chính "${grandparent.name}" chưa được khôi phục`);
+          return;
+        }
+      }
+    }
+    try {
+      await categoriesApi.adminRestore(c.id);
+      toast.success(`Đã khôi phục "${c.name}"`);
+      load();
+    } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       toast.error(msg || "Không thể khôi phục");
     }
@@ -405,15 +460,15 @@ export default function AdminCategoriesPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1 justify-end">
                       {c.deleted ? (
-                        <Button size="sm" variant="outline" className="text-green-600 hover:text-green-700" onClick={() => handleRestore(c.id)}>
+                        <Button size="sm" variant="outline" className="text-green-600 hover:text-green-700" onClick={() => handleRestore(c)}>
                           <RotateCcw className="w-3 h-3" />
                         </Button>
-                      ) : isRoot ? (
+                      ) : (
                         <>
-                          <Button size="sm" variant="outline" onClick={() => openEdit(c, depth)}><Pencil className="w-3 h-3" /></Button>
-                          <Button size="sm" variant="outline" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(c.id)}><Trash2 className="w-3 h-3" /></Button>
+                          {isRoot && <Button size="sm" variant="outline" onClick={() => openEdit(c, depth)}><Pencil className="w-3 h-3" /></Button>}
+                          <Button size="sm" variant="outline" className="text-red-500 hover:text-red-600" onClick={() => handleDeleteClick(c)}><Trash2 className="w-3 h-3" /></Button>
                         </>
-                      ) : null}
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -456,19 +511,21 @@ export default function AdminCategoriesPage() {
                   <span className="text-[10px] text-gray-400">{isRoot ? "Danh mục gốc" : `Cấp ${depth + 1}`}</span>
                   <div className="flex gap-1">
                     {c.deleted ? (
-                      <Button size="sm" variant="outline" className="h-8 px-2 text-green-600 hover:text-green-700" onClick={() => handleRestore(c.id)}>
+                      <Button size="sm" variant="outline" className="h-8 px-2 text-green-600 hover:text-green-700" onClick={() => handleRestore(c)}>
                         <RotateCcw className="h-3 w-3" />
                       </Button>
-                    ) : isRoot ? (
+                    ) : (
                       <>
-                        <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => openEdit(c, depth)}>
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-8 px-2 text-red-500 hover:text-red-600" onClick={() => handleDelete(c.id)}>
+                        {isRoot && (
+                          <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => openEdit(c, depth)}>
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                        <Button size="sm" variant="outline" className="h-8 px-2 text-red-500 hover:text-red-600" onClick={() => handleDeleteClick(c)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </>
-                    ) : null}
+                    )}
                   </div>
                 </div>
               </div>
@@ -652,6 +709,36 @@ export default function AdminCategoriesPage() {
               </div>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onOpenChange={(next) => { if (!next && !deleting) { setDeleteOpen(false); setDeleteTarget(null); } }}>
+        <DialogContent className="max-w-md p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Xóa danh mục</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-gray-700">
+              Bạn có chắc muốn xóa danh mục <span className="font-semibold">"{deleteTarget?.name}"</span>?
+            </p>
+            {deleteTarget && getNodeAndDescendants(deleteTarget).length > 1 && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                <p className="mb-2 text-xs font-semibold text-red-600">Các danh mục sau cũng sẽ bị chuyển vào thùng rác:</p>
+                <ul className="space-y-1">
+                  {getNodeAndDescendants(deleteTarget).slice(1).map((d) => (
+                    <li key={d.id} className="text-xs text-red-500">• {d.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="text-xs text-gray-500">Danh mục đã xóa có thể khôi phục lại từ thùng rác.</p>
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button type="button" variant="outline" disabled={deleting} onClick={() => { setDeleteOpen(false); setDeleteTarget(null); }}>Hủy</Button>
+            <Button type="button" variant="destructive" disabled={deleting} onClick={() => void confirmDelete()}>
+              {deleting ? "Đang xóa..." : "Xóa"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
