@@ -47,15 +47,18 @@ export default function AdminOrdersPage() {
   const [cancelReason, setCancelReason] = useState("");
   const [updating, setUpdating] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadGenRef = useRef(0);
 
   const load = async (kw: string) => {
+    const gen = ++loadGenRef.current;
     setLoading(true);
     try {
       const r = await ordersApi.adminGetAll({ status: status || undefined, keyword: kw.trim() || undefined, page, size: 20 });
+      if (gen !== loadGenRef.current) return;
       setOrders(r.data.result.content);
       setTotalPages(r.data.result.totalPages);
     } catch {}
-    setLoading(false);
+    if (gen === loadGenRef.current) setLoading(false);
   };
 
   useEffect(() => { load(debouncedKeyword); }, [status, debouncedKeyword, page]);

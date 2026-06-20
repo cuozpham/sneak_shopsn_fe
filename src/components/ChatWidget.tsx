@@ -228,9 +228,15 @@ export function ChatWidget() {
           );
         })()}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm leading-none">Sneak Shop</p>
+          <p className="font-serif font-bold leading-none tracking-[0.12em] text-[#B89047]">MANDRO</p>
           <p className="text-[10px] text-blue-100 mt-0.5 truncate">
-            {isSupport ? "Hỗ trợ trực tuyến" : effectiveCode}
+            {(() => {
+              const lastProductMsg = [...messages].reverse().find(
+                (m) => decodeChatMessage(m.content).product !== null
+              );
+              const code = lastProductMsg?.orderCode ?? effectiveCode;
+              return !code || code.startsWith("SUPPORT-") ? "Hỗ trợ trực tuyến" : code;
+            })()}
           </p>
         </div>
         <button onClick={closeChat} className="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center transition">
@@ -270,7 +276,7 @@ export function ChatWidget() {
           <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-400 px-4 text-center">
             <MessengerIcon className="w-10 h-10 text-blue-200" />
             <div>
-              <p className="text-sm font-medium text-gray-600">Chào mừng đến Sneak Shop!</p>
+              <p className="text-sm font-medium text-gray-600">Chào mừng đến <span className="font-serif font-bold tracking-[0.12em] text-[#B89047]">MANDRO</span>!</p>
               <p className="text-xs mt-1">Nhắn tin để được hỗ trợ nhanh nhất.</p>
             </div>
           </div>
