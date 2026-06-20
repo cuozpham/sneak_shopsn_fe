@@ -45,7 +45,7 @@ export default function AdminShippingFeesPage() {
     setLoading(true);
     try {
       const [configs, current] = await Promise.all([
-        shippingFeesApi.adminGetAll({ page: p, size: 12 }),
+        shippingFeesApi.adminGetAll({ page: p, size: 10 }),
         shippingFeesApi.getCurrent(),
       ]);
       setItems(configs.data.result.content);
@@ -192,7 +192,7 @@ export default function AdminShippingFeesPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  Array.from({ length: 4 }).map((_, index) => (
+                  Array.from({ length: 10 }).map((_, index) => (
                     <tr key={index} className="border-t">
                       <td colSpan={4} className="px-5 py-4"><Skeleton className="h-5" /></td>
                     </tr>
