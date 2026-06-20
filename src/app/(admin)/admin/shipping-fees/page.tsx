@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shippingFeesApi } from "@/lib/api/shipping-fees";
-import { formatVND } from "@/lib/format";
+import { formatDate, formatVND } from "@/lib/format";
 import type { ShippingFeeConfig } from "@/lib/types";
 import AdminPagination from "@/components/admin/AdminPagination";
 
@@ -204,7 +204,7 @@ export default function AdminShippingFeesPage() {
                     <td className="px-5 py-4 font-medium">{formatMonth(item.month)}</td>
                     <td className="px-5 py-4 font-semibold">{formatVND(item.fee)}</td>
                     <td className="px-5 py-4 text-gray-500">
-                      {new Date(item.updatedAt).toLocaleDateString("vi-VN")}
+                      {formatDate(item.updatedAt)}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <Button type="button" variant="outline" size="sm" onClick={() => edit(item)}>
