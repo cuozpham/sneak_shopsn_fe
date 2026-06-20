@@ -276,8 +276,10 @@ export default function AdminCategoriesPage() {
       }
       setOpen(false);
       load();
-    } catch { toast.error("Có lỗi xảy ra"); }
-    finally {
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || "Có lỗi xảy ra");
+    } finally {
       setSaving(false);
     }
   };
