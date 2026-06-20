@@ -61,6 +61,7 @@ export default function OrderDetailPage() {
   const [repurchasing, setRepurchasing] = useState(false);
   const [savePromptOpen, setSavePromptOpen] = useState(false);
   const saveActionRef = useRef<(() => Promise<void>) | null>(null);
+  const discardActionRef = useRef<(() => void) | null>(null);
   const reviewBaseRef = useRef<{ rating: number; comment: string; attachments: ReviewAttachment[] }>({
     rating: 5,
     comment: "",
@@ -68,17 +69,24 @@ export default function OrderDetailPage() {
   });
   const { setItems } = useCartStore();
 
-  const promptSave = (action: () => Promise<void>) => {
-    saveActionRef.current = action;
+  const promptSave = (save: () => Promise<void>, discard: () => void) => {
+    saveActionRef.current = save;
+    discardActionRef.current = discard;
     setSavePromptOpen(true);
   };
   const confirmSave = async () => {
     const action = saveActionRef.current;
     saveActionRef.current = null;
+    discardActionRef.current = null;
     setSavePromptOpen(false);
-    if (action) {
-      await action();
-    }
+    if (action) await action();
+  };
+  const confirmDiscard = () => {
+    const action = discardActionRef.current;
+    saveActionRef.current = null;
+    discardActionRef.current = null;
+    setSavePromptOpen(false);
+    if (action) action();
   };
 
   useEffect(() => {
@@ -129,15 +137,18 @@ export default function OrderDetailPage() {
   };
 
   const cancelDirty = selectedCancelReason.trim().length > 0 || customCancelReason.trim().length > 0;
-  const requestCloseCancelDialog = () => {
-    if (cancelDirty) {
-      promptSave(handleCancel);
-      return;
-    }
+  const closeCancelDialog = () => {
     setShowCancelDialog(false);
     setCancelReason("");
     setSelectedCancelReason("");
     setCustomCancelReason("");
+  };
+  const requestCloseCancelDialog = () => {
+    if (cancelDirty) {
+      promptSave(handleCancel, closeCancelDialog);
+      return;
+    }
+    closeCancelDialog();
   };
 
   const pickCancelReason = (reason: string) => {
@@ -247,7 +258,7 @@ export default function OrderDetailPage() {
       closeReviewDialog();
       return;
     }
-    promptSave(handleSubmitReview);
+    promptSave(handleSubmitReview, closeReviewDialog);
   };
 
   const openOrderChat = () => {
@@ -705,8 +716,8 @@ export default function OrderDetailPage() {
 
       <SaveOnExitDialog
         open={savePromptOpen}
-        onOpenChange={setSavePromptOpen}
-        onConfirm={() => void confirmSave()}
+        onSave={() => void confirmSave()}
+        onDiscard={confirmDiscard}
       />
     </div>
   );

@@ -259,14 +259,10 @@ export default function ProfilePage() {
       </div>
       <p className="font-bold text-lg mb-1">Bạn chưa đăng nhập</p>
       <p className="text-gray-500 text-sm mb-6">Đăng nhập để xem và chỉnh sửa thông tin cá nhân</p>
-      <div className="flex justify-center gap-3">
+      <div className="flex justify-center">
         <button onClick={() => router.push("/login")}
           className="px-6 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition">
           Đăng nhập
-        </button>
-        <button onClick={() => router.push("/register")}
-          className="px-6 py-2.5 border text-sm font-semibold rounded-xl hover:bg-gray-50 transition">
-          Đăng ký
         </button>
       </div>
     </div>

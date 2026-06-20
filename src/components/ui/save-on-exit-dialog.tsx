@@ -12,38 +12,34 @@ import {
 
 type SaveOnExitDialogProps = {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void | Promise<void>
+  onSave: () => void | Promise<void>
+  onDiscard: () => void
   title?: string
   description?: string
-  confirmLabel?: string
-  cancelLabel?: string
-  confirming?: boolean
+  saving?: boolean
 }
 
 export function SaveOnExitDialog({
   open,
-  onOpenChange,
-  onConfirm,
-  title = "Bạn có muốn lưu thông tin này không",
-  description = "Nhấn Có để lưu thay đổi hiện tại. Nhấn Huỷ để quay lại chỉnh sửa.",
-  confirmLabel = "Có",
-  cancelLabel = "Huỷ",
-  confirming = false,
+  onSave,
+  onDiscard,
+  title = "Bạn có thay đổi chưa lưu",
+  description = "Bạn muốn làm gì với thay đổi hiện tại?",
+  saving = false,
 }: SaveOnExitDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onDiscard(); }}>
       <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-end">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
-            {cancelLabel}
+          <Button type="button" variant="outline" onClick={onDiscard} className="w-full sm:w-auto">
+            Thoát
           </Button>
-          <Button type="button" onClick={() => void onConfirm()} disabled={confirming} className="w-full sm:w-auto">
-            {confirmLabel}
+          <Button type="button" onClick={() => void onSave()} disabled={saving} className="w-full sm:w-auto">
+            Lưu
           </Button>
         </DialogFooter>
       </DialogContent>

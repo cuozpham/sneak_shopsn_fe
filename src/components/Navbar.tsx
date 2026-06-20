@@ -645,9 +645,6 @@ export default function Navbar() {
                       <Link href="/login" onClick={() => setMobileOpen(false)} className="inline-flex w-full items-center justify-center rounded-full border px-4 py-2 text-sm sm:w-auto">
                         Đăng nhập
                       </Link>
-                      <Link href="/register" onClick={() => setMobileOpen(false)} className="inline-flex w-full items-center justify-center rounded-full bg-black px-4 py-2 text-sm text-white sm:w-auto">
-                        Đăng ký
-                      </Link>
                     </>
                   )}
                 </div>

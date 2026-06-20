@@ -70,12 +70,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="mt-5 pt-5 border-t border-gray-100 text-center text-sm text-gray-500">
-          Chưa có tài khoản?{" "}
-          <Link href="/register" className="font-semibold text-gray-900 hover:underline">
-            Đăng ký ngay
-          </Link>
-        </div>
       </div>
 
     </div>
