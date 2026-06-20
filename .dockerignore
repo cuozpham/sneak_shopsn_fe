@@ -1,0 +1,12 @@
+node_modules
+.next
+.pnpm-store
+.git
+.idea
+.DS_Store
+be/target
+be/node_modules
+fe/node_modules
+fe/.next
+fe/.pnpm-store
+uploads
