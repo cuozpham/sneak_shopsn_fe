@@ -295,11 +295,8 @@ export default function AdminCategoriesPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const all = getNodeAndDescendants(deleteTarget);
-      for (const cat of [...all].reverse()) {
-        await categoriesApi.adminDelete(cat.id);
-      }
-      const count = all.length;
+      const count = getNodeAndDescendants(deleteTarget).length;
+      await categoriesApi.adminDelete(deleteTarget.id);
       toast.success(count > 1
         ? `Đã chuyển ${count} danh mục vào thùng rác`
         : `Đã chuyển "${deleteTarget.name}" vào thùng rác`);
