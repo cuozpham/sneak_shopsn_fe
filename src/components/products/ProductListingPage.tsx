@@ -193,6 +193,21 @@ export default function ProductListingPage() {
   const categorySlug = searchParams.get("categorySlug") || "";
   const sortTitle = sort === "newest" ? "Mới" : sort === "sale" ? "Giảm giá" : "";
 
+  // Sync dropdown with URL params whenever categories load or URL changes
+  useEffect(() => {
+    if (!categories.length) return;
+    if (categorySlug) {
+      const found = categories.find((c) => c.slug === categorySlug);
+      setCategoryFilter(found ? String(found.id) : "all");
+      return;
+    }
+    if (categoryId) {
+      setCategoryFilter(categoryId);
+      return;
+    }
+    setCategoryFilter("all");
+  }, [categorySlug, categoryId, categories]);
+
   useEffect(() => {
     let alive = true;
     categoriesApi.getAll().then((r) => { if (alive) setCategories(r.data.result); }).catch(() => {});
@@ -268,16 +283,25 @@ export default function ProductListingPage() {
     }
   }, [pricePreset]);
 
+  const handleCategoryFilterChange = (value: string) => {
+    setPage(0);
+    if (value === "all") {
+      router.replace("/products");
+      return;
+    }
+    const found = categories.find((c) => String(c.id) === value);
+    if (found) {
+      router.replace(`/products?categorySlug=${encodeURIComponent(found.slug)}`);
+    }
+  };
+
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const resolvedCategoryId = categoryFilter !== "all"
-        ? Number(categoryFilter)
-        : (categoryId ? Number(categoryId) : undefined);
       const res = await productsApi.search({
         keyword: keyword || undefined,
-        categoryId: resolvedCategoryId,
-        categorySlug: categoryFilter !== "all" ? undefined : (categorySlug || undefined),
+        categoryId: categoryId ? Number(categoryId) : undefined,
+        categorySlug: categorySlug || undefined,
         status: "active",
         sort,
         minPrice: priceMin > 0 ? priceMin : undefined,
@@ -293,7 +317,7 @@ export default function ProductListingPage() {
     } finally {
       setLoading(false);
     }
-  }, [keyword, categoryId, categorySlug, categoryFilter, sort, page, priceMin, priceMax]);
+  }, [keyword, categoryId, categorySlug, sort, page, priceMin, priceMax]);
 
   useEffect(() => {
     void loadProducts();
@@ -375,7 +399,6 @@ export default function ProductListingPage() {
   const activeFilterChips = [
     keyword ? { key: "keyword", label: `Từ khóa: ${keyword}` } : null,
     categoryBreadcrumb.length > 0 ? { key: "category", label: categoryBreadcrumb.map((item) => item.name).join(" / ") } : null,
-    categoryFilter !== "all" ? { key: "categoryFilter", label: `Danh mục: ${categories.find((c) => String(c.id) === categoryFilter)?.name ?? categoryFilter}` } : null,
     ratingFilter !== "all" ? { key: "rating", label: `≥ ${ratingFilter} sao` } : null,
     priceMin > 0 || priceMax < MAX_PRICE ? { key: "price", label: `${formatVND(priceMin)} - ${formatVND(priceMax)}` } : null,
   ].filter(Boolean) as { key: string; label: string }[];
@@ -391,7 +414,7 @@ export default function ProductListingPage() {
           setKeywordInput={setKeywordInput}
           onSearchNow={searchNow}
           categoryFilter={categoryFilter}
-          setCategoryFilter={(value) => { setCategoryFilter(value); setPage(0); }}
+          setCategoryFilter={handleCategoryFilterChange}
           categories={categories}
           ratingFilter={ratingFilter}
           setRatingFilter={setRatingFilter}
