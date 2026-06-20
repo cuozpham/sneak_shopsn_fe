@@ -19,6 +19,13 @@ export default function ProductCard({ product }: { product: Product }) {
     product.discountPercent > 0
       ? product.price * (1 - product.discountPercent / 100)
       : null;
+  const totalStock =
+    product.stockQuantity ??
+    product.variants.reduce(
+      (sum, v) => sum + v.colors.reduce((s, c) => s + (c.stockQuantity ?? 0), 0),
+      0
+    );
+  const isOutOfStock = totalStock === 0 || product.status === "out_of_stock";
   const primaryMedia =
     product.media?.find((item) => getProductMediaUrl(item) && item.type !== "video") ??
     product.media?.[0] ??
@@ -110,6 +117,20 @@ export default function ProductCard({ product }: { product: Product }) {
               <span className="hidden text-xs text-slate-300 line-through sm:inline">
                 {formatVND(product.price)}
               </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isOutOfStock ? (
+              <span className="text-[10px] font-medium text-red-500">Hết hàng</span>
+            ) : (
+              <span className="text-[10px] text-gray-400">Còn {totalStock}</span>
+            )}
+            {product.variants.length > 0 && (
+              <span className="text-[10px] text-gray-300">·</span>
+            )}
+            {product.variants.length > 0 && (
+              <span className="text-[10px] text-gray-400">{product.variants.length} size</span>
             )}
           </div>
         </div>

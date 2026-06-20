@@ -106,6 +106,13 @@ export default function ProductDetailPage() {
   const selectedVariant = product?.variants.find((v) => v.id === selectedVariantId);
   const selectedColor = selectedVariant?.colors.find((c) => c.id === selectedColorId);
   const price = selectedVariant?.price ?? product?.price ?? 0;
+
+  const currentStock = selectedColor
+    ? (selectedColor.stockQuantity ?? 0)
+    : selectedVariant
+      ? selectedVariant.colors.reduce((s, c) => s + (c.stockQuantity ?? 0), 0)
+      : (product?.stockQuantity ?? 0);
+  const isOutOfStock = currentStock <= 0 || product?.status === "out_of_stock";
   const discountedPrice =
     product && product.discountPercent > 0
       ? price * (1 - product.discountPercent / 100)
@@ -379,7 +386,14 @@ export default function ProductDetailPage() {
         {/* Info */}
         <div className="min-w-0 max-w-full">
           <div className="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between">
-            <h1 className="min-w-0 break-words text-sm font-bold leading-snug text-gray-900 sm:text-2xl">{product.name}</h1>
+            <div className="min-w-0">
+              {product.shop && (
+                <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-gray-400 sm:text-xs">
+                  {product.shop.name}
+                </p>
+              )}
+              <h1 className="min-w-0 break-words text-sm font-bold leading-snug text-gray-900 sm:text-2xl">{product.name}</h1>
+            </div>
             <div className="relative flex-shrink-0">
               <button
                 onClick={() => void copyProductUrl()}
@@ -422,25 +436,38 @@ export default function ProductDetailPage() {
             <div className="mb-3">
               <p className="mb-1.5 text-[11px] font-medium sm:text-sm">Kích cỡ</p>
               <div className="flex flex-wrap gap-1 sm:gap-2">
-                {product.variants.map((v) => (
-                  <button
-                    key={v.id}
-                    disabled={v.colors.length === 0}
-                    onClick={() => {
-                      if (v.colors.length === 0) return;
-                      setSelectedVariantId(v.id);
-                      setSelectedColorId(null);
-                      setSelectedMedia(null);
-                    }}
-                    className={`rounded-lg border px-2 py-1.5 text-[10px] font-medium transition sm:px-4 sm:py-2 sm:text-sm ${
-                      selectedVariantId === v.id
-                        ? "border-black bg-black text-white"
-                        : "border-gray-200 hover:border-gray-400"
-                    } ${v.colors.length === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
-                  >
-                    {v.size}
-                  </button>
-                ))}
+                {product.variants.map((v) => {
+                  const variantStock = v.colors.reduce((s, c) => s + (c.stockQuantity ?? 0), 0);
+                  const unavailable = v.colors.length === 0;
+                  const variantOutOfStock = !unavailable && variantStock === 0;
+                  return (
+                    <button
+                      key={v.id}
+                      disabled={unavailable}
+                      onClick={() => {
+                        if (unavailable) return;
+                        setSelectedVariantId(v.id);
+                        setSelectedColorId(null);
+                        setSelectedMedia(null);
+                      }}
+                      className={`flex flex-col items-center rounded-lg border px-2 py-1 text-[10px] font-medium transition sm:px-4 sm:py-1.5 sm:text-sm ${
+                        selectedVariantId === v.id
+                          ? "border-black bg-black text-white"
+                          : variantOutOfStock
+                            ? "border-gray-200 text-gray-400 hover:border-gray-300"
+                            : "border-gray-200 hover:border-gray-400"
+                      } ${unavailable ? "opacity-40 cursor-not-allowed" : ""}`}
+                    >
+                      <span>{v.size}</span>
+                      {variantOutOfStock && (
+                        <span className={`text-[8px] leading-tight ${selectedVariantId === v.id ? "text-red-300" : "text-red-400"}`}>Hết hàng</span>
+                      )}
+                      {!variantOutOfStock && !unavailable && (
+                        <span className={`text-[8px] leading-tight ${selectedVariantId === v.id ? "text-gray-300" : "text-gray-400"}`}>Còn {variantStock}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -455,27 +482,36 @@ export default function ProductDetailPage() {
                     (color) => normalizeColor(color.color) === c.key
                   ) ?? null;
                   const available = Boolean(activeColor);
-                  const disabled = !activeColor || (activeColor.stockQuantity ?? 0) === 0;
+                  const colorStock = available ? (activeColor!.stockQuantity ?? 0) : 0;
+                  const colorOutOfStock = available && colorStock === 0;
                   const selected = activeColor?.id === selectedColorId;
                   return (
                     <button
                       key={c.key}
                       onClick={() => {
-                        if (!activeColor || disabled || !selectedVariant) return;
-                        setSelectedColorId(activeColor.id);
-                        const imageUrl = resolveColorImage(product, activeColor.color, selectedVariant.id, activeColor.id);
+                        if (!available || !selectedVariant) return;
+                        setSelectedColorId(activeColor!.id);
+                        const imageUrl = resolveColorImage(product, activeColor!.color, selectedVariant.id, activeColor!.id);
                         if (imageUrl) setSelectedMedia({ url: toFrontendImageUrl(imageUrl), type: "image" });
                       }}
-                      disabled={disabled}
-                      className={`rounded-lg border px-2 py-1.5 text-[10px] font-medium transition sm:px-4 sm:py-2 sm:text-sm ${
+                      disabled={!available}
+                      className={`flex flex-col items-center rounded-lg border px-2 py-1 text-[10px] font-medium transition sm:px-4 sm:py-1.5 sm:text-sm ${
                         selected
                           ? "border-black bg-black text-white"
-                          : disabled
+                          : !available
                             ? "border-dashed border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : "border-gray-200 hover:border-gray-400 bg-white text-gray-800"
+                            : colorOutOfStock
+                              ? "border-dashed border-gray-300 text-gray-500 hover:border-gray-400"
+                              : "border-gray-200 hover:border-gray-400 bg-white text-gray-800"
                       }`}
                     >
-                      {c.color}
+                      <span>{c.color}</span>
+                      {available && colorOutOfStock && (
+                        <span className={`text-[8px] leading-tight ${selected ? "text-red-300" : "text-red-400"}`}>Hết hàng</span>
+                      )}
+                      {available && !colorOutOfStock && (
+                        <span className={`text-[8px] leading-tight ${selected ? "text-gray-300" : "text-gray-400"}`}>Còn {colorStock}</span>
+                      )}
                     </button>
                   );
                 })}
@@ -485,7 +521,14 @@ export default function ProductDetailPage() {
 
           {/* Quantity */}
           <div className="mb-4">
-            <p className="mb-1.5 text-[11px] font-medium sm:text-sm">Số lượng</p>
+            <div className="mb-1.5 flex items-center gap-2">
+              <p className="text-[11px] font-medium sm:text-sm">Số lượng</p>
+              {isOutOfStock ? (
+                <span className="text-[10px] font-medium text-red-500">Hết hàng</span>
+              ) : (selectedVariantId || product.stockQuantity !== null) ? (
+                <span className="text-[10px] text-gray-400">Còn {currentStock}</span>
+              ) : null}
+            </div>
             <div className="flex items-center gap-1.5">
               <Button variant="outline" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
                 <Minus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -510,9 +553,9 @@ export default function ProductDetailPage() {
             <Button
               className="h-9 text-[11px] font-bold sm:h-12 sm:text-base"
               onClick={handleBuyNow}
-              disabled={adding || buying}
+              disabled={adding || buying || isOutOfStock}
             >
-              {buying ? "Đang chuyển..." : "Mua ngay"}
+              {buying ? "Đang chuyển..." : isOutOfStock ? "Hết hàng" : "Mua ngay"}
             </Button>
           </div>
           <Button
