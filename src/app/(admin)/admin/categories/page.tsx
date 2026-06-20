@@ -62,6 +62,7 @@ const getDescendantIds = (items: Category[], id: number): number[] => {
 };
 
 type CategoryNode = Category & { children: CategoryNode[] };
+const MAIN_DATALIST_ID = "category-main-options";
 const PARENT_DATALIST_ID = "category-parent-options";
 
 const buildCategoryTree = (items: Category[]): CategoryNode[] => {
@@ -255,8 +256,13 @@ export default function AdminCategoriesPage() {
       }
 
       if (editing === null) {
-        const mainRes = await createCategory(createForm.main.name, null, createForm.main.sortOrder);
-        const mainId = mainRes.data.result.id;
+        let mainId: number;
+        if (createForm.main.id !== null) {
+          mainId = createForm.main.id;
+        } else {
+          const mainRes = await createCategory(createForm.main.name, null, createForm.main.sortOrder);
+          mainId = mainRes.data.result.id;
+        }
         const parentName = createForm.parent.name.trim();
         let parentId: number | null = null;
 
@@ -591,14 +597,41 @@ export default function AdminCategoriesPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <p className="text-sm font-medium mb-1">Tên danh mục chính</p>
-                  <Input
-                    value={createForm.main.name}
-                    onChange={(e) => setCreateForm((f) => ({
-                      ...f,
-                      main: { ...f.main, name: e.target.value },
-                    }))}
-                    required
-                  />
+                  {editing === null ? (
+                    <>
+                      <Input
+                        list={MAIN_DATALIST_ID}
+                        value={createForm.main.name}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const matched = activeCategories.find((c) => !c.parentId && c.name === value);
+                          setCreateForm((f) => ({
+                            ...f,
+                            main: { ...f.main, name: value, id: matched ? matched.id : null },
+                          }));
+                        }}
+                        placeholder="Chọn hoặc nhập tên mới"
+                        required
+                      />
+                      <datalist id={MAIN_DATALIST_ID}>
+                        {activeCategories.filter((c) => !c.parentId).map((c) => (
+                          <option key={c.id} value={c.name} />
+                        ))}
+                      </datalist>
+                      {createForm.main.id !== null && (
+                        <p className="mt-1 text-xs text-blue-600">Đang thêm vào danh mục hiện có</p>
+                      )}
+                    </>
+                  ) : (
+                    <Input
+                      value={createForm.main.name}
+                      onChange={(e) => setCreateForm((f) => ({
+                        ...f,
+                        main: { ...f.main, name: e.target.value },
+                      }))}
+                      required
+                    />
+                  )}
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-1">STT</p>
@@ -610,6 +643,8 @@ export default function AdminCategoriesPage() {
                       ...f,
                       main: { ...f.main, sortOrder: e.target.value },
                     }))}
+                    placeholder="Tự động"
+                    disabled={editing === null && createForm.main.id !== null}
                   />
                 </div>
               </div>
@@ -660,6 +695,7 @@ export default function AdminCategoriesPage() {
                         ...f,
                         parent: { ...f.parent, sortOrder: e.target.value },
                       }))}
+                      placeholder="Tự động"
                     />
                   </div>
                 </div>
@@ -708,6 +744,7 @@ export default function AdminCategoriesPage() {
                         ...f,
                         child: { ...f.child, sortOrder: e.target.value },
                       }))}
+                      placeholder="Tự động"
                     />
                   </div>
                 </div>
