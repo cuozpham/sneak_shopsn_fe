@@ -12,7 +12,7 @@ import { SaveOnExitDialog } from "@/components/ui/save-on-exit-dialog";
 import { usersApi } from "@/lib/api/users";
 import { formatDate } from "@/lib/format";
 import type { User } from "@/lib/types";
-import { Search, Lock, Unlock, UserCog } from "lucide-react";
+import { Lock, Unlock, UserCog } from "lucide-react";
 import AdminPagination from "@/components/admin/AdminPagination";
 
 export default function AdminUsersPage() {
@@ -24,9 +24,6 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState({ email: "", fullName: "", password: "", phone: "", role: "user" });
-  const [creating, setCreating] = useState(false);
   const [lockOpen, setLockOpen] = useState(false);
   const [lockTarget, setLockTarget] = useState<User | null>(null);
   const [lockReason, setLockReason] = useState("");
@@ -38,7 +35,6 @@ export default function AdminUsersPage() {
   const [savePromptOpen, setSavePromptOpen] = useState(false);
   const saveActionRef = useRef<(() => Promise<void>) | null>(null);
   const discardActionRef = useRef<(() => void) | null>(null);
-  const createInitialRef = useRef({ email: "", fullName: "", password: "", phone: "", role: "user" });
 
   const promptSave = (save: () => Promise<void>, discard: () => void) => {
     saveActionRef.current = save;
