@@ -142,8 +142,9 @@ export default function AdminUsersPage() {
 
   const saveLock = async () => {
     if (!lockTarget) return;
-    if (!lockReason.trim()) {
-      toast.error("Vui lòng nhập lý do khóa");
+    const trimmed = lockReason.trim();
+    if (trimmed.length < 2 || trimmed.length > 500) {
+      toast.error("Bạn phải nhập lý do trong khoảng 2-500 chữ");
       return;
     }
     setLocking(true);
