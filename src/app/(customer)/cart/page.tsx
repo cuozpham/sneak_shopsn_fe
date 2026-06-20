@@ -84,7 +84,7 @@ export default function CartPage() {
 
   const selectedItems = items.filter((item) => selectedIds.has(item.id));
   const selectedSubtotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingFee = selectedSubtotal >= 500000 ? 0 : baseShippingFee;
+  const shippingFee = baseShippingFee;
   const selectedCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
   const allSelected = items.length > 0 && selectedIds.size === items.length;
   const someSelected = selectedIds.size > 0 && !allSelected;
@@ -260,11 +260,7 @@ export default function CartPage() {
               <span>{formatVND(selectedSubtotal + shippingFee)}</span>
             </div>
           </div>
-          {shippingFee > 0 && selectedItems.length > 0 && (
-            <p className="text-xs text-gray-400 mt-2">
-              Mua thêm {formatVND(Math.max(0, 500000 - selectedSubtotal))} để miễn phí ship
-            </p>
-          )}
+
           <Button
             className="w-full mt-4 h-11 font-bold"
             onClick={handleCheckoutSelected}

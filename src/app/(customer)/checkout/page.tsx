@@ -333,7 +333,7 @@ export default function CheckoutPage() {
     : items;
 
   const subtotal = checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingFee = subtotal >= 500000 ? 0 : baseShippingFee;
+  const shippingFee = baseShippingFee;
   const grandTotal = subtotal + shippingFee;
   const isBuyNow = buyNowItems.length > 0;
 
