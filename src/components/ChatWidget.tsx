@@ -228,7 +228,7 @@ export function ChatWidget() {
           );
         })()}
         <div className="flex-1 min-w-0">
-          <p className="font-serif font-bold leading-none tracking-[0.12em] text-[#B89047]">MANDRO</p>
+          <p className="font-serif font-bold leading-none tracking-[0.12em] text-white">MANDRO</p>
           <p className="text-[10px] text-blue-100 mt-0.5 truncate">
             {(() => {
               const lastProductMsg = [...messages].reverse().find(
