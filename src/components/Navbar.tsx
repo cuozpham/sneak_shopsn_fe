@@ -74,9 +74,6 @@ export default function Navbar() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showStoreModal, setShowStoreModal] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [moreCategories, setMoreCategories] = useState<CategoryNode[]>([]);
-  const [moreCatsLoading, setMoreCatsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -85,8 +82,6 @@ export default function Navbar() {
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const categoryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const showMoreRef = useRef<HTMLDivElement>(null);
-  const moreMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -107,19 +102,9 @@ export default function Navbar() {
   useEffect(() => {
     return () => {
       if (categoryTimer.current) clearTimeout(categoryTimer.current);
-      if (moreMenuTimer.current) clearTimeout(moreMenuTimer.current);
     };
   }, []);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (showMoreRef.current && !showMoreRef.current.contains(e.target as Node)) {
-        setShowMoreMenu(false);
-      }
-    };
-    if (showMoreMenu) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [showMoreMenu]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -199,23 +184,6 @@ export default function Navbar() {
   const topCategories = categoryTree.filter((c) => c.parentId == null);
   const visibleTopCategories = topCategories.slice(0, CATEGORY_LIMIT);
   const hasMoreCategories = topCategories.length >= 8;
-
-  const handleXemThem = async () => {
-    if (moreCategories.length === 0) {
-      setMoreCatsLoading(true);
-      try {
-        const r = await categoriesApi.getAll();
-        const tree = buildCategoryTree(r.data.result ?? []);
-        setMoreCategories(tree.filter((c) => c.parentId == null));
-      } catch {}
-      setMoreCatsLoading(false);
-    }
-    setShowMoreMenu(true);
-  };
-
-  const closeMoreMenu = () => {
-    moreMenuTimer.current = setTimeout(() => setShowMoreMenu(false), 100);
-  };
 
   const activeRoot = topCategories.find((c) => c.id === activeRootId) ?? null;
   const activeRootChildren = activeRoot?.children ?? [];
@@ -404,54 +372,13 @@ export default function Navbar() {
               })}
 
               {hasMoreCategories && (
-                <div
-                  ref={showMoreRef}
-                  className="relative"
-                  onMouseEnter={() => {
-                    if (moreMenuTimer.current) clearTimeout(moreMenuTimer.current);
-                    handleXemThem();
-                  }}
-                  onMouseLeave={closeMoreMenu}
+                <Link
+                  href="/products"
+                  className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium uppercase tracking-[0.12em] transition-colors text-black/60 hover:bg-black/5 hover:text-black"
                 >
-                  <button
-                    type="button"
-                    onClick={handleXemThem}
-                    className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium uppercase tracking-[0.12em] transition-colors text-black/60 hover:bg-black/5 hover:text-black"
-                  >
-                    Xem thêm
-                    {moreCatsLoading ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin opacity-60" />
-                    ) : (
-                      <ChevronDown className={`h-3.5 w-3.5 opacity-60 transition-transform ${showMoreMenu ? "rotate-180" : ""}`} />
-                    )}
-                  </button>
-
-                  {showMoreMenu && moreCategories.length > 0 && (
-                    <div
-                      className="absolute left-0 top-[calc(100%-1px)] z-50 pt-4"
-                      onMouseEnter={() => {
-                        if (moreMenuTimer.current) clearTimeout(moreMenuTimer.current);
-                      }}
-                      onMouseLeave={closeMoreMenu}
-                    >
-                      <div className="w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-black/8 bg-white shadow-2xl">
-                        <div className="max-h-96 overflow-y-auto py-2">
-                          {moreCategories.map((cat) => (
-                            <Link
-                              key={cat.id}
-                              href={`/products?categorySlug=${encodeURIComponent(cat.slug)}`}
-                              onClick={() => setShowMoreMenu(false)}
-                              className="flex items-center justify-between rounded-lg mx-2 my-0.5 px-3 py-2.5 text-sm font-medium uppercase tracking-[0.08em] text-gray-800 transition-colors hover:bg-gray-50 hover:text-black"
-                            >
-                              {cat.name}
-                              {cat.children.length > 0 && <ChevronRight className="h-4 w-4 opacity-40" />}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  Xem thêm
+                  <ChevronRight className="h-3.5 w-3.5 opacity-60" />
+                </Link>
               )}
             </div>
 

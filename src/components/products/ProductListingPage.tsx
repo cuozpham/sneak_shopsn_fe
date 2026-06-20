@@ -35,28 +35,28 @@ function ProductListingHero({
 function FilterPanel({
   keywordInput,
   setKeywordInput,
-  sizeFilter,
-  setSizeFilter,
+  categoryFilter,
+  setCategoryFilter,
+  categories,
   ratingFilter,
   setRatingFilter,
   sort,
   setSort,
   clearFilters,
-  sizeOptions,
   pricePreset,
   setPricePreset,
   onSearch,
 }: {
   keywordInput: string;
   setKeywordInput: (value: string) => void;
-  sizeFilter: string;
-  setSizeFilter: (value: string) => void;
+  categoryFilter: string;
+  setCategoryFilter: (value: string) => void;
+  categories: Category[];
   ratingFilter: string;
   setRatingFilter: (value: string) => void;
   sort: string;
   setSort: (value: string) => void;
   clearFilters: () => void;
-  sizeOptions: string[];
   pricePreset: string;
   setPricePreset: (value: string) => void;
   onSearch: (e: React.FormEvent) => void;
@@ -117,16 +117,16 @@ function FilterPanel({
       </div>
 
       <div className="w-full min-w-[160px] flex-1 sm:w-auto sm:flex-initial space-y-2">
-        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">KÍCH CỠ</p>
-        <Select value={sizeFilter} onValueChange={(value) => { if (value) setSizeFilter(value); }}>
+        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">DANH MỤC</p>
+        <Select value={categoryFilter} onValueChange={(value) => { if (value) setCategoryFilter(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue>{(v: string) => v === "all" ? "Tất cả kích cỡ" : v}</SelectValue>
+            <SelectValue>{(v: string) => v === "all" ? "Tất cả danh mục" : (categories.find((c) => String(c.id) === v)?.name ?? v)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả kích cỡ</SelectItem>
-            {sizeOptions.slice(0, 12).map((size) => (
-              <SelectItem key={size} value={size}>
-                {size}
+            <SelectItem value="all">Tất cả danh mục</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={String(c.id)}>
+                {c.parentName ? `${c.parentName} / ${c.name}` : c.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -183,7 +183,7 @@ export default function ProductListingPage() {
   const [keywordInput, setKeywordInput] = useState(initialKeyword);
   const [keyword, setKeyword] = useState(initialKeyword);
   const categoryId = searchParams.get("categoryId") || "";
-  const [sizeFilter, setSizeFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [ratingFilter, setRatingFilter] = useState("all");
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(MAX_PRICE);
@@ -276,10 +276,13 @@ export default function ProductListingPage() {
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
+      const resolvedCategoryId = categoryFilter !== "all"
+        ? Number(categoryFilter)
+        : (categoryId ? Number(categoryId) : undefined);
       const res = await productsApi.search({
         keyword: keyword || undefined,
-        categoryId: categoryId ? Number(categoryId) : undefined,
-        categorySlug: categorySlug || undefined,
+        categoryId: resolvedCategoryId,
+        categorySlug: categoryFilter !== "all" ? undefined : (categorySlug || undefined),
         status: "active",
         sort,
         minPrice: priceMin > 0 ? priceMin : undefined,
@@ -295,7 +298,7 @@ export default function ProductListingPage() {
     } finally {
       setLoading(false);
     }
-  }, [keyword, categoryId, categorySlug, sort, page, priceMin, priceMax]);
+  }, [keyword, categoryId, categorySlug, categoryFilter, sort, page, priceMin, priceMax]);
 
   useEffect(() => {
     void loadProducts();
@@ -338,39 +341,23 @@ export default function ProductListingPage() {
       ? [{ id: -1, name: sortTitle, slug: "" } as Category]
       : [];
 
-  const localFacetActive = sizeFilter !== "all" || ratingFilter !== "all" || pricePreset !== "all";
-
-  const sizeOptions = useMemo(() => {
-    const sizes = new Set<string>();
-    products.forEach((product) => {
-      product.variants.forEach((variant) => {
-        if (variant.size) sizes.add(variant.size);
-      });
-    });
-    return Array.from(sizes).sort((a, b) => {
-      const an = Number.parseFloat(a);
-      const bn = Number.parseFloat(b);
-      if (!Number.isNaN(an) && !Number.isNaN(bn)) return an - bn;
-      return a.localeCompare(b);
-    });
-  }, [products]);
+  const localFacetActive = ratingFilter !== "all" || pricePreset !== "all";
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const sizeOk = sizeFilter === "all" || product.variants.some((variant) => variant.size === sizeFilter);
       const ratingOk = ratingFilter === "all" || (product.ratingAverage ?? 0) >= Number(ratingFilter);
       const displayPrice = product.discountPercent > 0
         ? Math.round(product.price * (1 - product.discountPercent / 100))
         : product.price;
       const priceOk = displayPrice >= priceMin && displayPrice <= priceMax;
-      return sizeOk && ratingOk && priceOk;
+      return ratingOk && priceOk;
     });
-  }, [products, sizeFilter, ratingFilter, priceMin, priceMax]);
+  }, [products, ratingFilter, priceMin, priceMax]);
 
   const clearFilters = () => {
     setKeywordInput("");
     setKeyword("");
-    setSizeFilter("all");
+    setCategoryFilter("all");
     setRatingFilter("all");
     setPriceMin(0);
     setPriceMax(MAX_PRICE);
@@ -394,7 +381,7 @@ export default function ProductListingPage() {
   const activeFilterChips = [
     keyword ? { key: "keyword", label: `Từ khóa: ${keyword}` } : null,
     categoryBreadcrumb.length > 0 ? { key: "category", label: categoryBreadcrumb.map((item) => item.name).join(" / ") } : null,
-    sizeFilter !== "all" ? { key: "size", label: `Kích cỡ ${sizeFilter}` } : null,
+    categoryFilter !== "all" ? { key: "categoryFilter", label: `Danh mục: ${categories.find((c) => String(c.id) === categoryFilter)?.name ?? categoryFilter}` } : null,
     ratingFilter !== "all" ? { key: "rating", label: `≥ ${ratingFilter} sao` } : null,
     priceMin > 0 || priceMax < MAX_PRICE ? { key: "price", label: `${formatVND(priceMin)} - ${formatVND(priceMax)}` } : null,
   ].filter(Boolean) as { key: string; label: string }[];
@@ -409,8 +396,9 @@ export default function ProductListingPage() {
           keywordInput={keywordInput}
           setKeywordInput={setKeywordInput}
           onSearch={handleSearch}
-          sizeFilter={sizeFilter}
-          setSizeFilter={setSizeFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={(value) => { setCategoryFilter(value); setPage(0); }}
+          categories={categories}
           ratingFilter={ratingFilter}
           setRatingFilter={setRatingFilter}
           sort={sort}
@@ -419,7 +407,6 @@ export default function ProductListingPage() {
             setPage(0);
           }}
           clearFilters={clearFilters}
-          sizeOptions={sizeOptions}
           pricePreset={pricePreset}
           setPricePreset={setPricePreset}
         />

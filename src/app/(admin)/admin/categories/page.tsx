@@ -143,6 +143,7 @@ const directParentOf = (items: Category[], category: Category) => {
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trashView, setTrashView] = useState(false);
   const [open, setOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateFormState>(emptyCreateForm());
   const [editing, setEditing] = useState<number | null>(null);
@@ -383,12 +384,13 @@ export default function AdminCategoriesPage() {
   };
 
   const activeCategories = categories.filter((c) => !c.deleted);
+  const deletedCategories = categories.filter((c) => c.deleted);
   const editingDescendants = editing !== null
     ? new Set<number>([editing, ...getDescendantIds(activeCategories, editing)])
     : new Set<number>();
   const parentOptions = activeCategories.filter((c) => !c.parentId && !editingDescendants.has(c.id));
 
-  const categoryTree = buildCategoryTree(categories);
+  const displayTree = buildCategoryTree(trashView ? deletedCategories : activeCategories);
   const rows: Array<{ node: CategoryNode; depth: number }> = [];
   const pushRows = (nodes: CategoryNode[], depth = 0) => {
     nodes.forEach((node) => {
@@ -396,16 +398,34 @@ export default function AdminCategoriesPage() {
       if (node.children.length > 0) pushRows(node.children, depth + 1);
     });
   };
-  pushRows(categoryTree);
+  pushRows(displayTree);
 
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold sm:text-2xl">Quản lý danh mục</h1>
+        <h1 className="text-xl font-bold sm:text-2xl">
+          {trashView ? "Thùng rác – Danh mục" : "Quản lý danh mục"}
+        </h1>
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => openCreate()} className="w-full gap-1 sm:w-auto">
-            <Plus className="w-4 h-4" />Thêm danh mục
+          <Button
+            size="sm"
+            variant={trashView ? "destructive" : "outline"}
+            onClick={() => setTrashView((v) => !v)}
+            className="gap-1"
+          >
+            <Trash2 className="w-4 h-4" />
+            {trashView ? "← Quay lại" : "Thùng rác"}
+            {!trashView && deletedCategories.length > 0 && (
+              <span className="ml-0.5 rounded-full bg-red-500 text-white text-[10px] px-1.5 py-0.5 leading-none">
+                {deletedCategories.length}
+              </span>
+            )}
           </Button>
+          {!trashView && (
+            <Button size="sm" onClick={() => openCreate()} className="gap-1">
+              <Plus className="w-4 h-4" />Thêm danh mục
+            </Button>
+          )}
         </div>
       </div>
 
