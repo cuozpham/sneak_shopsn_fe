@@ -26,7 +26,7 @@ interface FinancialLog {
 }
 
 const HEADERS = [
-  "Người mua", "orderCode", "Mã GD", "Hình thức",
+  "Người mua", "Mã đơn", "Mã GD", "Hình thức",
   "Số tiền", "Địa chỉ giao hàng", "Ghi chú", "Thời gian",
 ];
 

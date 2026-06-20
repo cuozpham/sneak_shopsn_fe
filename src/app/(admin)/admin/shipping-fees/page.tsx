@@ -5,6 +5,7 @@ import { Save, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shippingFeesApi } from "@/lib/api/shipping-fees";
 import { formatVND } from "@/lib/format";
@@ -15,6 +16,14 @@ const currentMonth = () => {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 };
+
+const MONTH_NAMES = [
+  "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
+  "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
+  "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
+];
+
+const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 1 + i);
 
 const formatMonth = (value: string) => {
   const [year, month] = value.split("-");
@@ -99,10 +108,33 @@ export default function AdminShippingFeesPage() {
             </div>
           </div>
 
-          <label className="block space-y-1.5">
+          <div className="space-y-1.5">
             <span className="text-sm font-medium">Tháng áp dụng</span>
-            <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} required />
-          </label>
+            <div className="grid grid-cols-2 gap-2">
+              <Select
+                value={month.split("-")[1] ?? ""}
+                onValueChange={(v) => setMonth((m) => `${m.split("-")[0]}-${v}`)}
+              >
+                <SelectTrigger><SelectValue placeholder="Tháng" /></SelectTrigger>
+                <SelectContent>
+                  {MONTH_NAMES.map((name, i) => (
+                    <SelectItem key={i + 1} value={String(i + 1).padStart(2, "0")}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={month.split("-")[0] ?? ""}
+                onValueChange={(v) => setMonth((m) => `${v}-${m.split("-")[1]}`)}
+              >
+                <SelectTrigger><SelectValue placeholder="Năm" /></SelectTrigger>
+                <SelectContent>
+                  {YEAR_OPTIONS.map((y) => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <label className="block space-y-1.5">
             <span className="text-sm font-medium">Phí vận chuyển</span>
