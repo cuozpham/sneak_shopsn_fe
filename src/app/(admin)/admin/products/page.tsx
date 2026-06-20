@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -17,17 +17,19 @@ import AdminPagination from "@/components/admin/AdminPagination";
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [keyword, setKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
   const [showDeleted, setShowDeleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const load = async () => {
+  const load = async (kw: string) => {
     setLoading(true);
     try {
       const r = await productsApi.adminSearch({
-        keyword: keyword || undefined,
+        keyword: kw || undefined,
         status: status || undefined,
         deleted: showDeleted,
         page,
@@ -39,16 +41,30 @@ export default function AdminProductsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [status, page, showDeleted]);
+  useEffect(() => { load(debouncedKeyword); }, [status, page, showDeleted, debouncedKeyword]);
 
-  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); setPage(0); load(); };
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedKeyword(keyword);
+      setPage(0);
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [keyword]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setDebouncedKeyword(keyword);
+    setPage(0);
+  };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Chuyển sản phẩm này vào thùng rác? Bạn có thể khôi phục lại sau.")) return;
     try {
       await productsApi.delete(id);
       toast.success("Đã chuyển sản phẩm vào thùng rác");
-      load();
+      load(debouncedKeyword);
     } catch { toast.error("Không thể chuyển sản phẩm vào thùng rác"); }
   };
 

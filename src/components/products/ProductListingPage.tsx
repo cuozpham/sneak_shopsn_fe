@@ -194,6 +194,7 @@ export default function ProductListingPage() {
   const [suggestionOpen, setSuggestionOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const searchWrapRef = useRef<HTMLFormElement | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const categorySlug = searchParams.get("categorySlug") || "";
   const sortTitle = sort === "newest" ? "Mới" : sort === "sale" ? "Giảm giá" : "";
 
@@ -223,6 +224,15 @@ export default function ProductListingPage() {
     setKeyword(kw);
     setKeywordInput(kw);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setKeyword(keywordInput.trim());
+      setPage(0);
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [keywordInput]);
 
   useEffect(() => {
     if (searchOpen) {
@@ -289,6 +299,7 @@ export default function ProductListingPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setKeyword(keywordInput.trim());
     setPage(0);
     setSuggestionOpen(false);

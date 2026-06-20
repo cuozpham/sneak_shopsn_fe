@@ -18,10 +18,12 @@ import AdminPagination from "@/components/admin/AdminPagination";
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [keyword, setKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState({ email: "", fullName: "", password: "", phone: "", role: "user" });
   const [creating, setCreating] = useState(false);
@@ -50,19 +52,33 @@ export default function AdminUsersPage() {
     }
   };
 
-  const load = async () => {
+  const load = async (kw: string) => {
     setLoading(true);
     try {
-      const r = await usersApi.getAll({ keyword: keyword || undefined, role: role || undefined, page, size: 10 });
+      const r = await usersApi.getAll({ keyword: kw || undefined, role: role || undefined, page, size: 10 });
       setUsers(r.data.result.content);
       setTotalPages(r.data.result.totalPages);
     } catch {}
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [role, page]);
+  useEffect(() => { load(debouncedKeyword); }, [role, page, debouncedKeyword]);
 
-  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); setPage(0); load(); };
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedKeyword(keyword);
+      setPage(0);
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [keyword]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setDebouncedKeyword(keyword);
+    setPage(0);
+  };
 
   const closeCreateDialog = () => {
     setCreateOpen(false);
@@ -112,7 +128,7 @@ export default function AdminUsersPage() {
         try {
           await usersApi.unlock(user.id);
           toast.success("Đã mở khóa tài khoản");
-          load();
+          load(debouncedKeyword);
         } catch {
           toast.error("Thao tác thất bại");
         }
@@ -137,7 +153,7 @@ export default function AdminUsersPage() {
       setLockOpen(false);
       setLockTarget(null);
       setLockReason("");
-      load();
+      load(debouncedKeyword);
     } catch {
       toast.error("Thao tác thất bại");
     } finally {
@@ -156,7 +172,7 @@ export default function AdminUsersPage() {
       await usersApi.create(createForm);
       toast.success("Tạo tài khoản thành công");
       closeCreateDialog();
-      load();
+      load(debouncedKeyword);
     } catch { toast.error("Có lỗi xảy ra"); }
     setCreating(false);
   };
@@ -187,7 +203,7 @@ export default function AdminUsersPage() {
       toast.success("Đã cập nhật vai trò");
       closeRoleDialog();
       setRoleTarget(null);
-      await load();
+      await load(debouncedKeyword);
     } catch (error) {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
       toast.error(message || "Không thể cập nhật vai trò");
