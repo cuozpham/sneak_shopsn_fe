@@ -72,6 +72,9 @@ export default function Navbar() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showStoreModal, setShowStoreModal] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [moreCategories, setMoreCategories] = useState<CategoryNode[]>([]);
+  const [moreCatsLoading, setMoreCatsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -80,6 +83,8 @@ export default function Navbar() {
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const categoryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showMoreRef = useRef<HTMLDivElement>(null);
+  const moreMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -100,8 +105,19 @@ export default function Navbar() {
   useEffect(() => {
     return () => {
       if (categoryTimer.current) clearTimeout(categoryTimer.current);
+      if (moreMenuTimer.current) clearTimeout(moreMenuTimer.current);
     };
   }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (showMoreRef.current && !showMoreRef.current.contains(e.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    };
+    if (showMoreMenu) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showMoreMenu]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -175,12 +191,29 @@ export default function Navbar() {
     router.push("/");
   };
 
+  const CATEGORY_LIMIT = 7;
+
   const categoryTree = buildCategoryTree(categories);
   const topCategories = categoryTree.filter((c) => c.parentId == null);
-  const navLinks = [
-    { href: "/products", label: "Mới" },
-    { href: "/products?sort=sale", label: "Giảm giá" },
-  ];
+  const visibleTopCategories = topCategories.slice(0, CATEGORY_LIMIT);
+  const hasMoreCategories = topCategories.length >= 8;
+
+  const handleXemThem = async () => {
+    if (moreCategories.length === 0) {
+      setMoreCatsLoading(true);
+      try {
+        const r = await categoriesApi.getAll();
+        const tree = buildCategoryTree(r.data.result ?? []);
+        setMoreCategories(tree.filter((c) => c.parentId == null));
+      } catch {}
+      setMoreCatsLoading(false);
+    }
+    setShowMoreMenu(true);
+  };
+
+  const closeMoreMenu = () => {
+    moreMenuTimer.current = setTimeout(() => setShowMoreMenu(false), 100);
+  };
 
   const activeRoot = topCategories.find((c) => c.id === activeRootId) ?? null;
   const activeRootChildren = activeRoot?.children ?? [];
@@ -285,25 +318,7 @@ export default function Navbar() {
             </Link>
 
             <div className="hidden flex-1 items-center justify-center pr-[12%] gap-5 lg:flex">
-              {navLinks.map((link) => {
-                const active =
-                  link.href === "/products"
-                    ? pathname.startsWith("/products")
-                    : pathname.startsWith(link.href);
-                return (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium uppercase tracking-[0.12em] transition-colors ${
-                      active ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5 hover:text-black"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-
-              {topCategories.map((category) => {
+              {visibleTopCategories.map((category) => {
                 const hasChildren = category.children.length > 0;
                 const active = pathname.includes(`categorySlug=${encodeURIComponent(category.slug)}`);
                 return (
@@ -385,6 +400,57 @@ export default function Navbar() {
                   </div>
                 );
               })}
+
+              {hasMoreCategories && (
+                <div
+                  ref={showMoreRef}
+                  className="relative"
+                  onMouseEnter={() => {
+                    if (moreMenuTimer.current) clearTimeout(moreMenuTimer.current);
+                    handleXemThem();
+                  }}
+                  onMouseLeave={closeMoreMenu}
+                >
+                  <button
+                    type="button"
+                    onClick={handleXemThem}
+                    className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-[14px] font-medium uppercase tracking-[0.12em] transition-colors text-black/60 hover:bg-black/5 hover:text-black"
+                  >
+                    Xem thêm
+                    {moreCatsLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin opacity-60" />
+                    ) : (
+                      <ChevronDown className={`h-3.5 w-3.5 opacity-60 transition-transform ${showMoreMenu ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+
+                  {showMoreMenu && moreCategories.length > 0 && (
+                    <div
+                      className="absolute left-0 top-[calc(100%-1px)] z-50 pt-4"
+                      onMouseEnter={() => {
+                        if (moreMenuTimer.current) clearTimeout(moreMenuTimer.current);
+                      }}
+                      onMouseLeave={closeMoreMenu}
+                    >
+                      <div className="w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-black/8 bg-white shadow-2xl">
+                        <div className="max-h-96 overflow-y-auto py-2">
+                          {moreCategories.map((cat) => (
+                            <Link
+                              key={cat.id}
+                              href={`/products?categorySlug=${encodeURIComponent(cat.slug)}`}
+                              onClick={() => setShowMoreMenu(false)}
+                              className="flex items-center justify-between rounded-lg mx-2 my-0.5 px-3 py-2.5 text-sm font-medium uppercase tracking-[0.08em] text-gray-800 transition-colors hover:bg-gray-50 hover:text-black"
+                            >
+                              {cat.name}
+                              {cat.children.length > 0 && <ChevronRight className="h-4 w-4 opacity-40" />}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2" ref={dropdownRef}>
@@ -553,16 +619,6 @@ export default function Navbar() {
           {mobileOpen && (
             <div ref={mobileMenuRef} className="border-t border-black/5 bg-[#f7f7f5] px-4 py-4 lg:hidden">
               <div className="mx-auto max-w-7xl space-y-3">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium uppercase tracking-[0.12em] text-black/80 hover:bg-black/5"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
                 {renderMobileCategoryTree(topCategories)}
                 <div className="grid gap-2 pt-2 sm:flex sm:flex-wrap">
                   {user ? (
