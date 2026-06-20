@@ -465,7 +465,6 @@ export default function AdminProductFormPage() {
                 <SelectContent>
                   <SelectItem value="active">Đang bán</SelectItem>
                   <SelectItem value="inactive">Ẩn</SelectItem>
-                  <SelectItem value="out_of_stock">Hết hàng</SelectItem>
                 </SelectContent>
               </Select>
             </div>
