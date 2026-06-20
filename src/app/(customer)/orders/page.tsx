@@ -55,6 +55,7 @@ export default function OrdersPage() {
   const [selectedCancelReason, setSelectedCancelReason] = useState("");
   const [customCancelReason, setCustomCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const cancellingRef = useRef(false);
   const [savePromptOpen, setSavePromptOpen] = useState(false);
   const saveActionRef = useRef<(() => Promise<void>) | null>(null);
   const discardActionRef = useRef<(() => void) | null>(null);
@@ -119,7 +120,7 @@ export default function OrdersPage() {
   };
 
   const handleCancelOrder = async () => {
-    if (!cancelOrderCode) return;
+    if (!cancelOrderCode || cancellingRef.current) return;
     const reason = (selectedCancelReason === "Tôi không tìm thấy lý do hủy phù hợp, khác."
       ? customCancelReason.trim()
       : selectedCancelReason.trim());
@@ -128,6 +129,7 @@ export default function OrdersPage() {
       return;
     }
     try {
+      cancellingRef.current = true;
       setCancelling(true);
       await ordersApi.cancelOrder(cancelOrderCode, reason);
       toast.success("Đã hủy đơn hàng");
@@ -136,12 +138,14 @@ export default function OrdersPage() {
     } catch (err) {
       toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể hủy đơn hàng");
     } finally {
+      cancellingRef.current = false;
       setCancelling(false);
     }
   };
 
   const cancelDirty = selectedCancelReason.trim().length > 0 || customCancelReason.trim().length > 0;
   const requestCloseCancelDialog = () => {
+    if (cancellingRef.current) { closeCancelDialog(); return; }
     if (cancelDirty) {
       promptSave(handleCancelOrder, closeCancelDialog);
       return;
