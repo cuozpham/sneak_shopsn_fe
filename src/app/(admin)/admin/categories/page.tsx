@@ -439,9 +439,18 @@ export default function AdminCategoriesPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {!isRoot && <span className="text-gray-300 select-none" style={{ paddingLeft: `${depth * 16}px` }}>↳</span>}
-                      <span className={`font-medium ${isRoot ? "text-gray-900" : "text-gray-700"} ${c.deleted ? "line-through text-red-400" : ""}`}>
-                        {c.name}
-                      </span>
+                      {c.deleted ? (
+                        <span className="font-medium line-through text-red-400">{c.name}</span>
+                      ) : (
+                        <a
+                          href={`/products?categorySlug=${encodeURIComponent(c.slug)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`font-medium hover:underline ${isRoot ? "text-gray-900" : "text-gray-700"}`}
+                        >
+                          {c.name}
+                        </a>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center text-gray-500">{c.sortOrder ?? "—"}</td>
@@ -491,9 +500,18 @@ export default function AdminCategoriesPage() {
               <div key={c.id} className={`rounded-xl border bg-white p-3 shadow-sm ${c.deleted ? "bg-red-50" : ""}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className={`truncate text-sm font-semibold ${c.deleted ? "line-through text-red-400" : "text-gray-900"}`}>
-                      {c.name}
-                    </p>
+                    {c.deleted ? (
+                      <p className="truncate text-sm font-semibold line-through text-red-400">{c.name}</p>
+                    ) : (
+                      <a
+                        href={`/products?categorySlug=${encodeURIComponent(c.slug)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="truncate text-sm font-semibold text-gray-900 hover:underline"
+                      >
+                        {c.name}
+                      </a>
+                    )}
                     <p className="text-xs text-gray-500">STT: {c.sortOrder ?? "—"}</p>
                   </div>
                   {c.deleted ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, ChevronRight, LayoutDashboard, Loader2, LogOut, Menu, Package, Search, ShoppingBag, User, UserCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -60,6 +60,8 @@ export default function Navbar() {
   const count = useCartStore((s) => s.count());
   const router = useRouter();
   const pathname = usePathname();
+  const navSearchParams = useSearchParams();
+  const activeCategorySlug = navSearchParams.get("categorySlug") || "";
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeRootId, setActiveRootId] = useState<number | null>(null);
   const [activeChildId, setActiveChildId] = useState<number | null>(null);
@@ -320,7 +322,7 @@ export default function Navbar() {
             <div className="hidden flex-1 items-center justify-center pr-[12%] gap-5 lg:flex">
               {visibleTopCategories.map((category) => {
                 const hasChildren = category.children.length > 0;
-                const active = pathname.includes(`categorySlug=${encodeURIComponent(category.slug)}`);
+                const active = pathname === "/products" && activeCategorySlug === category.slug;
                 return (
                   <div
                     key={category.id}

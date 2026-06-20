@@ -220,6 +220,10 @@ export default function ProductListingPage() {
   }, [sortParam]);
 
   useEffect(() => {
+    setPage(0);
+  }, [categorySlug]);
+
+  useEffect(() => {
     const kw = searchParams.get("keyword") || "";
     setKeyword(kw);
     setKeywordInput(kw);
