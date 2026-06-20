@@ -159,6 +159,7 @@ export function ChatWidget() {
       await chatApi.sendMessage(effectiveCode, encodeChatMessage(input, pendingProduct, pendingImages));
       setInput("");
       setPendingImages([]);
+      clearPendingProduct();
       await load(true);
     } catch (err) { toast.error(getError(err)); }
     setSending(false);
