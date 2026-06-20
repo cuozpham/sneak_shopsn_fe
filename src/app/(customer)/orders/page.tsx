@@ -503,7 +503,7 @@ function OrderCard({ order, reviewedOrderItemIds, onRefresh, onRequestCancel }: 
               </Link>
               <button
                 onClick={() => void handleContactSeller()}
-                className="inline-flex h-8 items-center justify-center rounded-md border border-gray-300 bg-white px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50">
+                className="inline-flex h-8 w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 sm:w-auto">
                 Liên Hệ Người Bán
               </button>
             </>

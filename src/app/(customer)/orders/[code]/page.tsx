@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -321,9 +322,9 @@ export default function OrderDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-700">← Quay lại</button>
-        <h1 className="text-xl font-bold">Đơn #{order.orderCode}</h1>
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <button onClick={() => router.back()} className="shrink-0 text-gray-400 hover:text-gray-700">← Quay lại</button>
+        <h1 className="text-lg font-bold sm:text-xl">Đơn #{order.orderCode}</h1>
         <Badge variant={ORDER_STATUS_COLOR[order.status]}>
           {ORDER_STATUS_LABEL[order.status] || order.status}
         </Badge>
@@ -335,17 +336,27 @@ export default function OrderDetailPage() {
           <h2 className="font-bold mb-3">Sản phẩm</h2>
           <div className="space-y-3">
             {order.items.map((item) => (
-              <div key={item.id} className="flex items-start justify-between gap-4 text-sm">
-                <div className="min-w-0">
-                  <p className="font-medium">{item.productName}</p>
+              <div key={item.id} className="flex gap-3 text-sm">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                  {item.productImage ? (
+                    <Image src={item.productImage} alt={item.productName} width={64} height={64} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-2xl">👟</div>
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium leading-snug line-clamp-2">{item.productName}</p>
+                    <p className="shrink-0 font-semibold text-blue-600">{formatVND(item.finalPrice * item.quantity)}</p>
+                  </div>
                   {(item.variantName || item.colorName) && (
-                    <p className="text-gray-400 text-xs">
+                    <p className="text-xs text-gray-400">
                       {[item.variantName, item.colorName].filter(Boolean).join(" · ")}
                     </p>
                   )}
-                  <p className="text-gray-500">×{item.quantity}</p>
+                  <p className="text-xs text-gray-500">×{item.quantity}</p>
                   {order.status === "completed" && (
-                    <div className="mt-2">
+                    <div className="mt-1">
                       <Button
                         type="button"
                         size="sm"
@@ -368,7 +379,6 @@ export default function OrderDetailPage() {
                     </div>
                   )}
                 </div>
-                <p className="font-medium whitespace-nowrap">{formatVND(item.finalPrice * item.quantity)}</p>
               </div>
             ))}
           </div>
