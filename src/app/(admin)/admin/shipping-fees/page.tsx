@@ -80,6 +80,10 @@ export default function AdminShippingFeesPage() {
       toast.error("Vui lòng chọn tháng áp dụng");
       return;
     }
+    if (month < currentMonth()) {
+      toast.error("Không thể lưu cấu hình cho tháng trong quá khứ");
+      return;
+    }
     if (!Number.isFinite(amount) || amount < 0) {
       toast.error("Phí vận chuyển không hợp lệ");
       return;
@@ -124,9 +128,17 @@ export default function AdminShippingFeesPage() {
               >
                 <SelectTrigger><SelectValue placeholder="Tháng" /></SelectTrigger>
                 <SelectContent>
-                  {MONTH_NAMES.map((name, i) => (
-                    <SelectItem key={i + 1} value={String(i + 1).padStart(2, "0")}>{name}</SelectItem>
-                  ))}
+                  {MONTH_NAMES.map((name, i) => {
+                    const selectedYear = Number(month.split("-")[0]);
+                    const now = new Date();
+                    const isPast = selectedYear < now.getFullYear() ||
+                      (selectedYear === now.getFullYear() && i + 1 < now.getMonth() + 1);
+                    return (
+                      <SelectItem key={i + 1} value={String(i + 1).padStart(2, "0")} disabled={isPast}>
+                        {name}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               <Select
@@ -136,7 +148,9 @@ export default function AdminShippingFeesPage() {
                 <SelectTrigger><SelectValue placeholder="Năm" /></SelectTrigger>
                 <SelectContent>
                   {yearOptions.map((y) => (
-                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    <SelectItem key={y} value={String(y)} disabled={y < new Date().getFullYear()}>
+                      {y}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
