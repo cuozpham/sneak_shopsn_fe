@@ -35,6 +35,7 @@ function ProductListingHero({
 function FilterPanel({
   keywordInput,
   setKeywordInput,
+  onSearchNow,
   categoryFilter,
   setCategoryFilter,
   categories,
@@ -45,10 +46,10 @@ function FilterPanel({
   clearFilters,
   pricePreset,
   setPricePreset,
-  onSearch,
 }: {
   keywordInput: string;
   setKeywordInput: (value: string) => void;
+  onSearchNow: () => void;
   categoryFilter: string;
   setCategoryFilter: (value: string) => void;
   categories: Category[];
@@ -59,7 +60,6 @@ function FilterPanel({
   clearFilters: () => void;
   pricePreset: string;
   setPricePreset: (value: string) => void;
-  onSearch: (e: React.FormEvent) => void;
 }) {
   const priceLabelMap: Record<string, string> = {
     all: "Tất cả",
@@ -71,13 +71,14 @@ function FilterPanel({
   };
 
   return (
-    <form onSubmit={onSearch} className="flex flex-wrap items-end gap-4">
+    <div className="flex flex-wrap items-end gap-4">
       <div className="min-w-[240px] flex-1 space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">TÌM KIẾM</p>
         <div className="relative">
           <Input
             value={keywordInput}
             onChange={(e) => setKeywordInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") onSearchNow(); }}
             placeholder="Tìm sản phẩm"
             className="h-12 rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 pr-10 text-sm text-[#1A1A1A] shadow-sm placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-4 focus-visible:ring-[#D4AF7A]/15"
           />
@@ -157,14 +158,8 @@ function FilterPanel({
         >
           Đặt lại
         </Button>
-        <Button
-          type="submit"
-          className="h-12 flex-1 sm:flex-initial rounded-[14px] bg-[#111111] px-4 text-white transition-colors hover:bg-[#D4AF7A] hover:text-white"
-        >
-          Tìm
-        </Button>
       </div>
-    </form>
+    </div>
   );
 }
 
@@ -234,7 +229,7 @@ export default function ProductListingPage() {
     debounceRef.current = setTimeout(() => {
       setKeyword(keywordInput.trim());
       setPage(0);
-    }, 400);
+    }, 500);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [keywordInput]);
 
@@ -304,8 +299,7 @@ export default function ProductListingPage() {
     void loadProducts();
   }, [loadProducts]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const searchNow = () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setKeyword(keywordInput.trim());
     setPage(0);
@@ -395,7 +389,7 @@ export default function ProductListingPage() {
         <FilterPanel
           keywordInput={keywordInput}
           setKeywordInput={setKeywordInput}
-          onSearch={handleSearch}
+          onSearchNow={searchNow}
           categoryFilter={categoryFilter}
           setCategoryFilter={(value) => { setCategoryFilter(value); setPage(0); }}
           categories={categories}
