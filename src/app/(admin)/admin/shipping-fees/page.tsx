@@ -23,7 +23,7 @@ const MONTH_NAMES = [
   "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
 ];
 
-const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 1 + i);
+const BASE_YEAR_OPTIONS = Array.from({ length: 8 }, (_, i) => new Date().getFullYear() - 3 + i);
 
 const formatMonth = (value: string) => {
   const [year, month] = value.split("-");
@@ -34,6 +34,7 @@ export default function AdminShippingFeesPage() {
   const [items, setItems] = useState<ShippingFeeConfig[]>([]);
   const [month, setMonth] = useState(currentMonth());
   const [fee, setFee] = useState("30000");
+  const [yearOptions, setYearOptions] = useState(BASE_YEAR_OPTIONS);
   const [currentFee, setCurrentFee] = useState(30000);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,10 +61,16 @@ export default function AdminShippingFeesPage() {
   useEffect(() => { void load(page); }, [page]);
 
   const edit = (item: ShippingFeeConfig) => {
-    setMonth(item.month);
+    const [itemYear, itemMonth] = item.month.split("-");
+    const normalized = `${itemYear}-${String(Number(itemMonth)).padStart(2, "0")}`;
+    setMonth(normalized);
     setFee(String(item.fee));
+    const year = Number(itemYear);
+    setYearOptions((prev) =>
+      prev.includes(year) ? prev : [...prev, year].sort((a, b) => a - b)
+    );
     window.scrollTo({ top: 0, behavior: "smooth" });
-    toast.info(`Đang sửa ${formatMonth(item.month)} — chỉnh phí rồi bấm Lưu cấu hình`);
+    toast.info(`Đang sửa ${formatMonth(normalized)} — chỉnh phí rồi bấm Lưu cấu hình`);
   };
 
   const save = async (event: React.FormEvent) => {
@@ -128,7 +135,7 @@ export default function AdminShippingFeesPage() {
               >
                 <SelectTrigger><SelectValue placeholder="Năm" /></SelectTrigger>
                 <SelectContent>
-                  {YEAR_OPTIONS.map((y) => (
+                  {yearOptions.map((y) => (
                     <SelectItem key={y} value={String(y)}>{y}</SelectItem>
                   ))}
                 </SelectContent>
