@@ -85,7 +85,7 @@ export default function AdminProductsPage() {
         {!showDeleted && (
           <Select value={status || "all"} onValueChange={(v) => { setStatus(!v || v === "all" ? "" : v); setPage(0); }}>
             <SelectTrigger className="w-full bg-white sm:w-40">
-              <SelectValue />
+              <SelectValue>{(v: string) => ({ all: "Tất cả", active: "Đang bán", inactive: "Ẩn", out_of_stock: "Hết hàng" })[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả</SelectItem>

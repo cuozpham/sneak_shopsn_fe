@@ -37,19 +37,27 @@ export default function AdminUsersPage() {
   const [updatingRole, setUpdatingRole] = useState(false);
   const [savePromptOpen, setSavePromptOpen] = useState(false);
   const saveActionRef = useRef<(() => Promise<void>) | null>(null);
+  const discardActionRef = useRef<(() => void) | null>(null);
   const createInitialRef = useRef({ email: "", fullName: "", password: "", phone: "", role: "user" });
 
-  const promptSave = (action: () => Promise<void>) => {
-    saveActionRef.current = action;
+  const promptSave = (save: () => Promise<void>, discard: () => void) => {
+    saveActionRef.current = save;
+    discardActionRef.current = discard;
     setSavePromptOpen(true);
   };
   const confirmSave = async () => {
     const action = saveActionRef.current;
     saveActionRef.current = null;
+    discardActionRef.current = null;
     setSavePromptOpen(false);
-    if (action) {
-      await action();
-    }
+    if (action) await action();
+  };
+  const confirmDiscard = () => {
+    const action = discardActionRef.current;
+    saveActionRef.current = null;
+    discardActionRef.current = null;
+    setSavePromptOpen(false);
+    if (action) action();
   };
 
   const load = async (kw: string) => {
@@ -102,21 +110,21 @@ export default function AdminUsersPage() {
 
   const requestCloseCreate = () => {
     if (createDirty) {
-      promptSave(saveCreate);
+      promptSave(saveCreate, closeCreateDialog);
       return;
     }
     closeCreateDialog();
   };
   const requestCloseLock = () => {
     if (lockDirty) {
-      promptSave(saveLock);
+      promptSave(saveLock, closeLockDialog);
       return;
     }
     closeLockDialog();
   };
   const requestCloseRole = () => {
     if (roleDirty) {
-      promptSave(saveRole);
+      promptSave(saveRole, closeRoleDialog);
       return;
     }
     closeRoleDialog();
@@ -240,7 +248,7 @@ export default function AdminUsersPage() {
         </form>
         <Select value={role || "all"} onValueChange={(v) => { setRole(!v || v === "all" ? "" : v); setPage(0); }}>
           <SelectTrigger className="w-full bg-white sm:w-36">
-            <SelectValue />
+            <SelectValue>{(v: string) => ({ all: "Tất cả", user: "Người dùng", admin: "Quản trị" })[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả</SelectItem>
@@ -388,7 +396,7 @@ export default function AdminUsersPage() {
             <div>
               <p className="text-sm font-medium mb-1">Vai trò</p>
               <Select value={createForm.role} onValueChange={(v) => setCreateForm((f) => ({ ...f, role: v ?? "user" }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue>{(v: string) => v === "admin" ? "Quản trị" : "Người dùng"}</SelectValue></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">Người dùng</SelectItem>
                   <SelectItem value="admin">Quản trị</SelectItem>
@@ -465,7 +473,7 @@ export default function AdminUsersPage() {
             <div>
               <p className="mb-1 text-sm font-medium">Vai trò mới</p>
               <Select value={nextRole} onValueChange={(value) => setNextRole((value ?? "user") as "user" | "admin")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue>{(v: string) => v === "admin" ? "Quản trị" : "Người dùng"}</SelectValue></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">Người dùng</SelectItem>
                   <SelectItem value="admin">Quản trị</SelectItem>
@@ -487,8 +495,8 @@ export default function AdminUsersPage() {
 
       <SaveOnExitDialog
         open={savePromptOpen}
-        onOpenChange={setSavePromptOpen}
-        onConfirm={() => void confirmSave()}
+        onSave={() => void confirmSave()}
+        onDiscard={confirmDiscard}
       />
     </div>
   );

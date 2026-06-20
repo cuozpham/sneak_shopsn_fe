@@ -88,7 +88,7 @@ function FilterPanel({
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">SẮP XẾP</p>
         <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue />
+            <SelectValue>{(v: string) => ({ newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần", sold: "Bán chạy", rating: "Đánh giá cao" })[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Mới nhất</SelectItem>
@@ -104,7 +104,7 @@ function FilterPanel({
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">GIÁ</p>
         <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue />
+            <SelectValue>{(v: string) => priceLabelMap[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {Object.entries(priceLabelMap).map(([value, label]) => (
@@ -120,7 +120,7 @@ function FilterPanel({
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">KÍCH CỠ</p>
         <Select value={sizeFilter} onValueChange={(value) => { if (value) setSizeFilter(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue />
+            <SelectValue>{(v: string) => v === "all" ? "Tất cả kích cỡ" : v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả kích cỡ</SelectItem>
@@ -137,7 +137,7 @@ function FilterPanel({
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">ĐÁNH GIÁ</p>
         <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue />
+            <SelectValue>{(v: string) => ({ all: "Tất cả", "4.5": "≥ 4.5 sao", "4.0": "≥ 4.0 sao", "3.5": "≥ 3.5 sao" })[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả</SelectItem>

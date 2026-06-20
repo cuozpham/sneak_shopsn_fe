@@ -113,7 +113,7 @@ export default function AdminOrdersPage() {
           </div>
           <Select value={status || "all"} onValueChange={(v) => { setStatus(!v || v === "all" ? "" : v); setPage(0); }}>
             <SelectTrigger className="w-full bg-white sm:w-44">
-              <SelectValue />
+              <SelectValue>{(v: string) => (!v || v === "all") ? "Tất cả" : ORDER_STATUS_LABEL[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả</SelectItem>

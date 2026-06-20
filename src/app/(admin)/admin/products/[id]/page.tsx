@@ -461,7 +461,7 @@ export default function AdminProductFormPage() {
             <div className="space-y-1">
               <p className="text-sm font-medium">Trạng thái</p>
               <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v ?? "active" }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue>{(v: string) => v === "active" ? "Đang bán" : "Ẩn"}</SelectValue></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="active">Đang bán</SelectItem>
                   <SelectItem value="inactive">Ẩn</SelectItem>

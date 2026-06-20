@@ -141,23 +141,31 @@ export default function AdminCategoriesPage() {
   const [savePromptOpen, setSavePromptOpen] = useState(false);
   const initialFormRef = useRef<CreateFormState>(emptyCreateForm());
   const saveActionRef = useRef<(() => Promise<void>) | null>(null);
+  const discardActionRef = useRef<(() => void) | null>(null);
 
   const isDirty = JSON.stringify(createForm) !== JSON.stringify(initialFormRef.current);
-  const promptSave = (action: () => Promise<void>) => {
-    saveActionRef.current = action;
+  const promptSave = (save: () => Promise<void>, discard: () => void) => {
+    saveActionRef.current = save;
+    discardActionRef.current = discard;
     setSavePromptOpen(true);
   };
   const confirmSave = async () => {
     const action = saveActionRef.current;
     saveActionRef.current = null;
+    discardActionRef.current = null;
     setSavePromptOpen(false);
-    if (action) {
-      await action();
-    }
+    if (action) await action();
+  };
+  const confirmDiscard = () => {
+    const action = discardActionRef.current;
+    saveActionRef.current = null;
+    discardActionRef.current = null;
+    setSavePromptOpen(false);
+    if (action) action();
   };
   const requestClose = () => {
     if (isDirty) {
-      promptSave(saveCategory);
+      promptSave(saveCategory, () => setOpen(false));
       return;
     }
     setOpen(false);
@@ -631,7 +639,7 @@ export default function AdminCategoriesPage() {
                   value={createForm.status}
                   onValueChange={(v) => setCreateForm((f) => ({ ...f, status: v === "inactive" ? "inactive" : "active" }))}
                 >
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full"><SelectValue>{(v: string) => v === "active" ? "Hoạt động" : "Ẩn"}</SelectValue></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Hoạt động</SelectItem>
                     <SelectItem value="inactive">Ẩn</SelectItem>
@@ -649,8 +657,8 @@ export default function AdminCategoriesPage() {
 
       <SaveOnExitDialog
         open={savePromptOpen}
-        onOpenChange={setSavePromptOpen}
-        onConfirm={() => void confirmSave()}
+        onSave={() => void confirmSave()}
+        onDiscard={confirmDiscard}
       />
     </div>
   );
