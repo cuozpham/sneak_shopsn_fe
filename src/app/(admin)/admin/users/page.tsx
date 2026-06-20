@@ -77,19 +77,6 @@ export default function AdminUsersPage() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [keyword]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setDebouncedKeyword(keyword);
-    setPage(0);
-  };
-
-  const closeCreateDialog = () => {
-    setCreateOpen(false);
-    const next = { email: "", fullName: "", password: "", phone: "", role: "user" };
-    setCreateForm(next);
-    createInitialRef.current = next;
-  };
   const closeLockDialog = () => {
     setLockOpen(false);
     setLockTarget(null);
@@ -100,17 +87,9 @@ export default function AdminUsersPage() {
     setRoleTarget(null);
   };
 
-  const createDirty = JSON.stringify(createForm) !== JSON.stringify(createInitialRef.current);
   const lockDirty = lockReason.trim().length > 0;
   const roleDirty = Boolean(roleTarget) && nextRole !== roleTarget?.role;
 
-  const requestCloseCreate = () => {
-    if (createDirty) {
-      promptSave(saveCreate, closeCreateDialog);
-      return;
-    }
-    closeCreateDialog();
-  };
   const requestCloseLock = () => {
     if (lockDirty) {
       promptSave(saveLock, closeLockDialog);
@@ -171,29 +150,6 @@ export default function AdminUsersPage() {
     await saveLock();
   };
 
-  const saveCreate = async () => {
-    setCreating(true);
-    try {
-      await usersApi.create(createForm);
-      toast.success("Tạo tài khoản thành công");
-      closeCreateDialog();
-      load(debouncedKeyword);
-    } catch { toast.error("Có lỗi xảy ra"); }
-    setCreating(false);
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await saveCreate();
-  };
-
-  const openCreateDialog = () => {
-    const next = { email: "", fullName: "", password: "", phone: "", role: "user" };
-    createInitialRef.current = next;
-    setCreateForm(next);
-    setCreateOpen(true);
-  };
-
   const handleRoleChange = (user: User) => {
     setRoleTarget(user);
     setNextRole(user.role);
@@ -221,9 +177,6 @@ export default function AdminUsersPage() {
     await saveRole();
   };
 
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setCreateForm((f) => ({ ...f, [k]: e.target.value }));
-
   const roleLabel = (value: string) => {
     if (value === "admin") return "Quản trị";
     if (value === "user") return "Người dùng";
@@ -234,14 +187,15 @@ export default function AdminUsersPage() {
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-bold sm:text-2xl">Quản lý người dùng</h1>
-        <Button className="w-full sm:w-auto" onClick={openCreateDialog}>+ Tạo tài khoản</Button>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <form onSubmit={handleSearch} className="flex w-full gap-2 sm:max-w-sm">
-          <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-          <Button type="submit" size="icon" variant="outline"><Search className="w-4 h-4" /></Button>
-        </form>
+        <Input
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="Tìm kiếm..."
+          className="w-full sm:max-w-sm"
+        />
         <Select value={role || "all"} onValueChange={(v) => { setRole(!v || v === "all" ? "" : v); setPage(0); }}>
           <SelectTrigger className="w-full bg-white sm:w-36">
             <SelectValue>{(v: string) => ({ all: "Tất cả", user: "Người dùng", admin: "Quản trị" })[v] ?? v}</SelectValue>
@@ -367,45 +321,6 @@ export default function AdminUsersPage() {
       </div>
 
       <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-
-      <Dialog open={createOpen} onOpenChange={(next) => {
-        if (next) {
-          setCreateOpen(true);
-          return;
-        }
-        requestCloseCreate();
-      }}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-          <DialogHeader><DialogTitle>Tạo tài khoản mới</DialogTitle></DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-3">
-            {[
-              { id: "fullName", label: "Họ tên", type: "text" },
-              { id: "email", label: "Email", type: "email" },
-              { id: "phone", label: "SĐT", type: "tel" },
-              { id: "password", label: "Mật khẩu", type: "password" },
-            ].map(({ id, label, type }) => (
-              <div key={id}>
-                <p className="text-sm font-medium mb-1">{label}</p>
-                <Input type={type} value={createForm[id as keyof typeof createForm]} onChange={set(id)} required={id !== "phone"} />
-              </div>
-            ))}
-            <div>
-              <p className="text-sm font-medium mb-1">Vai trò</p>
-              <Select value={createForm.role} onValueChange={(v) => setCreateForm((f) => ({ ...f, role: v ?? "user" }))}>
-                <SelectTrigger><SelectValue>{(v: string) => v === "admin" ? "Quản trị" : "Người dùng"}</SelectValue></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Người dùng</SelectItem>
-                  <SelectItem value="admin">Quản trị</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2 justify-end pt-2 sm:flex-row">
-              <Button type="button" variant="outline" onClick={requestCloseCreate}>Hủy</Button>
-              <Button type="submit" disabled={creating}>{creating ? "Đang tạo..." : "Tạo"}</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={lockOpen} onOpenChange={(next) => {
         if (next) {

@@ -28,15 +28,24 @@ export default function AdminProductsPage() {
   const load = async (kw: string) => {
     setLoading(true);
     try {
-      const r = await productsApi.adminSearch({
-        keyword: kw || undefined,
-        status: status || undefined,
-        deleted: showDeleted,
-        page,
-        size: 20,
-      });
-      setProducts(r.data.result.content);
-      setTotalPages(r.data.result.totalPages);
+      if (showDeleted) {
+        const [deletedRes, inactiveRes] = await Promise.all([
+          productsApi.adminSearch({ keyword: kw || undefined, deleted: true, page, size: 10 }),
+          productsApi.adminSearch({ keyword: kw || undefined, status: "inactive", deleted: false, page, size: 10 }),
+        ]);
+        setProducts([...deletedRes.data.result.content, ...inactiveRes.data.result.content]);
+        setTotalPages(Math.max(deletedRes.data.result.totalPages, inactiveRes.data.result.totalPages));
+      } else {
+        const r = await productsApi.adminSearch({
+          keyword: kw || undefined,
+          status: status || undefined,
+          deleted: false,
+          page,
+          size: 20,
+        });
+        setProducts(r.data.result.content.filter((p) => p.status !== "inactive"));
+        setTotalPages(r.data.result.totalPages);
+      }
     } catch {}
     setLoading(false);
   };
@@ -85,12 +94,11 @@ export default function AdminProductsPage() {
         {!showDeleted && (
           <Select value={status || "all"} onValueChange={(v) => { setStatus(!v || v === "all" ? "" : v); setPage(0); }}>
             <SelectTrigger className="w-full bg-white sm:w-40">
-              <SelectValue>{(v: string) => ({ all: "Tất cả", active: "Đang bán", inactive: "Ẩn", out_of_stock: "Hết hàng" })[v] ?? v}</SelectValue>
+              <SelectValue>{(v: string) => ({ all: "Tất cả", active: "Đang bán", out_of_stock: "Hết hàng" })[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả</SelectItem>
               <SelectItem value="active">Đang bán</SelectItem>
-              <SelectItem value="inactive">Ẩn</SelectItem>
               <SelectItem value="out_of_stock">Hết hàng</SelectItem>
             </SelectContent>
           </Select>
