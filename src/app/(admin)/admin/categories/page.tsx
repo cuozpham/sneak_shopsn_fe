@@ -603,6 +603,7 @@ export default function AdminCategoriesPage() {
                     <>
                       <Input
                         list={MAIN_DATALIST_ID}
+                        autoComplete="off"
                         value={createForm.main.name}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -674,6 +675,7 @@ export default function AdminCategoriesPage() {
                     <p className="text-sm font-medium mb-1">Tên danh mục cha</p>
                     <Input
                       list={PARENT_DATALIST_ID}
+                      autoComplete="off"
                       value={createForm.parent.name}
                       onChange={(e) => setCreateForm((f) => ({
                         ...f,
