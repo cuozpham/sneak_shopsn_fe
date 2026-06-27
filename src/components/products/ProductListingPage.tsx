@@ -60,9 +60,6 @@ function CategoryCascadeSelect({
   const subCats = useCallback((mainId: number) => categories.filter((c) => c.parentId === mainId), [categories]);
   const childCats = useCallback((subId: number) => categories.filter((c) => c.parentId === subId), [categories]);
 
-  const activeSubs = useMemo(() => hoveredMain !== null ? subCats(hoveredMain) : [], [hoveredMain, subCats]);
-  const activeChildren = useMemo(() => hoveredSub !== null ? childCats(hoveredSub) : [], [hoveredSub, childCats]);
-
   const selectedCat = value === "all" ? null : categories.find((c) => String(c.id) === value);
   const displayLabel = selectedCat ? selectedCat.name : "Tất cả danh mục";
 
@@ -72,6 +69,8 @@ function CategoryCascadeSelect({
     setHoveredMain(null);
     setHoveredSub(null);
   };
+
+  const panelCls = "absolute top-0 left-full z-50 rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg py-2 w-max";
 
   return (
     <div ref={ref} className="relative">
@@ -85,68 +84,68 @@ function CategoryCascadeSelect({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-1 flex items-start rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg overflow-hidden w-max">
-          <div className="py-2 border-r border-[#D4AF7A]/20">
-            <div
-              className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] whitespace-nowrap text-[#1A1A1A] ${value === "all" ? "font-semibold text-[#B68C4A]" : ""}`}
-              onMouseEnter={() => { setHoveredMain(null); setHoveredSub(null); }}
-              onClick={() => select("all")}
-            >
-              Tất cả danh mục
-            </div>
-            {mainCats.map((main) => {
-              const hasSubs = subCats(main.id).length > 0;
-              const isSelected = String(main.id) === value;
-              return (
+        <div className="absolute top-full left-0 z-50 mt-1 rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg py-2 w-max">
+          <div
+            className={`px-4 py-2 text-sm cursor-pointer whitespace-nowrap hover:bg-[#FBF7EE] ${value === "all" ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+            onMouseEnter={() => { setHoveredMain(null); setHoveredSub(null); }}
+            onClick={() => select("all")}
+          >
+            Tất cả danh mục
+          </div>
+          {mainCats.map((main) => {
+            const subs = subCats(main.id);
+            const isSelected = String(main.id) === value;
+            return (
+              <div key={main.id} className="relative">
                 <div
-                  key={main.id}
                   className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredMain === main.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
                   onMouseEnter={() => { setHoveredMain(main.id); setHoveredSub(null); }}
                   onClick={() => select(String(main.id))}
                 >
                   <span>{main.name}</span>
-                  {hasSubs && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
+                  {subs.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
                 </div>
-              );
-            })}
-          </div>
 
-          {activeSubs.length > 0 && (
-            <div className="py-2 border-r border-[#D4AF7A]/20">
-              {activeSubs.map((sub) => {
-                const hasChildren = childCats(sub.id).length > 0;
-                const isSelected = String(sub.id) === value;
-                return (
-                  <div
-                    key={sub.id}
-                    className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredSub === sub.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
-                    onMouseEnter={() => setHoveredSub(sub.id)}
-                    onClick={() => select(String(sub.id))}
-                  >
-                    <span>{sub.name}</span>
-                    {hasChildren && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                {hoveredMain === main.id && subs.length > 0 && (
+                  <div className={panelCls}>
+                    {subs.map((sub) => {
+                      const children = childCats(sub.id);
+                      const isSubSelected = String(sub.id) === value;
+                      return (
+                        <div key={sub.id} className="relative">
+                          <div
+                            className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredSub === sub.id ? "bg-[#FBF7EE]" : ""} ${isSubSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                            onMouseEnter={() => setHoveredSub(sub.id)}
+                            onClick={() => select(String(sub.id))}
+                          >
+                            <span>{sub.name}</span>
+                            {children.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
+                          </div>
 
-          {activeChildren.length > 0 && (
-            <div className="py-2">
-              {activeChildren.map((child) => {
-                const isSelected = String(child.id) === value;
-                return (
-                  <div
-                    key={child.id}
-                    className={`px-4 py-2 text-sm cursor-pointer whitespace-nowrap hover:bg-[#FBF7EE] ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
-                    onClick={() => select(String(child.id))}
-                  >
-                    {child.name}
+                          {hoveredSub === sub.id && children.length > 0 && (
+                            <div className={panelCls}>
+                              {children.map((child) => {
+                                const isChildSelected = String(child.id) === value;
+                                return (
+                                  <div
+                                    key={child.id}
+                                    className={`px-4 py-2 text-sm cursor-pointer whitespace-nowrap hover:bg-[#FBF7EE] ${isChildSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                                    onClick={() => select(String(child.id))}
+                                  >
+                                    {child.name}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
