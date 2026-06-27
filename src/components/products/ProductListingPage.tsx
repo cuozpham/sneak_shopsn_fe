@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,127 @@ function ProductListingHero({
         <HomeHeroCarousel banners={banners} />
       </div>
     </section>
+  );
+}
+
+function CategoryCascadeSelect({
+  value,
+  onChange,
+  categories,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  categories: Category[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [hoveredMain, setHoveredMain] = useState<number | null>(null);
+  const [hoveredSub, setHoveredSub] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const mainCats = useMemo(() => categories.filter((c) => !c.parentId), [categories]);
+  const subCats = useCallback((mainId: number) => categories.filter((c) => c.parentId === mainId), [categories]);
+  const childCats = useCallback((subId: number) => categories.filter((c) => c.parentId === subId), [categories]);
+
+  const activeSubs = useMemo(() => hoveredMain !== null ? subCats(hoveredMain) : [], [hoveredMain, subCats]);
+  const activeChildren = useMemo(() => hoveredSub !== null ? childCats(hoveredSub) : [], [hoveredSub, childCats]);
+
+  const selectedCat = value === "all" ? null : categories.find((c) => String(c.id) === value);
+  const displayLabel = selectedCat ? selectedCat.name : "Tất cả danh mục";
+
+  const select = (id: string) => {
+    onChange(id);
+    setOpen(false);
+    setHoveredMain(null);
+    setHoveredSub(null);
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-left text-sm text-[#1A1A1A] shadow-sm flex items-center justify-between gap-2 focus:outline-none focus:ring-4 focus:ring-[#D4AF7A]/15"
+      >
+        <span className="truncate">{displayLabel}</span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[#5A4E46] transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 z-50 mt-1 flex rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg overflow-hidden">
+          <div className="min-w-[160px] py-2 border-r border-[#D4AF7A]/20">
+            <div
+              className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] text-[#1A1A1A] ${value === "all" ? "font-semibold text-[#B68C4A]" : ""}`}
+              onMouseEnter={() => { setHoveredMain(null); setHoveredSub(null); }}
+              onClick={() => select("all")}
+            >
+              Tất cả danh mục
+            </div>
+            {mainCats.map((main) => {
+              const hasSubs = subCats(main.id).length > 0;
+              const isSelected = String(main.id) === value;
+              return (
+                <div
+                  key={main.id}
+                  className={`px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:bg-[#FBF7EE] ${hoveredMain === main.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                  onMouseEnter={() => { setHoveredMain(main.id); setHoveredSub(null); }}
+                  onClick={() => select(String(main.id))}
+                >
+                  <span>{main.name}</span>
+                  {hasSubs && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
+                </div>
+              );
+            })}
+          </div>
+
+          {activeSubs.length > 0 && (
+            <div className="min-w-[160px] py-2 border-r border-[#D4AF7A]/20">
+              {activeSubs.map((sub) => {
+                const hasChildren = childCats(sub.id).length > 0;
+                const isSelected = String(sub.id) === value;
+                return (
+                  <div
+                    key={sub.id}
+                    className={`px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:bg-[#FBF7EE] ${hoveredSub === sub.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                    onMouseEnter={() => setHoveredSub(sub.id)}
+                    onClick={() => select(String(sub.id))}
+                  >
+                    <span>{sub.name}</span>
+                    {hasChildren && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {activeChildren.length > 0 && (
+            <div className="min-w-[160px] py-2">
+              {activeChildren.map((child) => {
+                const isSelected = String(child.id) === value;
+                return (
+                  <div
+                    key={child.id}
+                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                    onClick={() => select(String(child.id))}
+                  >
+                    {child.name}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -119,19 +240,11 @@ function FilterPanel({
 
       <div className="w-full min-w-[160px] flex-1 sm:w-auto sm:flex-initial space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">DANH MỤC</p>
-        <Select value={categoryFilter} onValueChange={(value) => { if (value) setCategoryFilter(value); }}>
-          <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue>{(v: string) => v === "all" ? "Tất cả danh mục" : (categories.find((c) => String(c.id) === v)?.name ?? v)}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả danh mục</SelectItem>
-            {categories.map((c) => (
-              <SelectItem key={c.id} value={String(c.id)}>
-                {c.parentName ? `${c.parentName} / ${c.name}` : c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <CategoryCascadeSelect
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          categories={categories}
+        />
       </div>
 
       <div className="w-full min-w-[160px] flex-1 sm:w-auto sm:flex-initial space-y-2">
