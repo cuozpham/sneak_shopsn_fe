@@ -84,7 +84,7 @@ function CategoryCascadeSelect({
   const panelCls = "absolute top-0 left-full z-50 rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg py-2 w-max";
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative w-full">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -257,78 +257,80 @@ function FilterPanel({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,1fr))_auto] items-end gap-3">
-      <div className="space-y-2">
-        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">TÌM KIẾM</p>
-        <Input
-          value={keywordInput}
-          onChange={(e) => setKeywordInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") onSearchNow(); }}
-          placeholder="Tìm sản phẩm"
-          className="h-12 rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-sm text-[#1A1A1A] shadow-sm placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-4 focus-visible:ring-[#D4AF7A]/15"
-        />
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+      <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="space-y-2">
+          <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">TÌM KIẾM</p>
+          <Input
+            value={keywordInput}
+            onChange={(e) => setKeywordInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") onSearchNow(); }}
+            placeholder="Tìm sản phẩm"
+            className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-sm text-[#1A1A1A] shadow-sm placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-4 focus-visible:ring-[#D4AF7A]/15"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">SẮP XẾP</p>
+          <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
+            <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
+              <SelectValue>{(v: string) => ({ newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần", sold: "Bán chạy", rating: "Đánh giá cao" })[v] ?? v}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Mới nhất</SelectItem>
+              <SelectItem value="price_asc">Giá tăng dần</SelectItem>
+              <SelectItem value="price_desc">Giá giảm dần</SelectItem>
+              <SelectItem value="sold">Bán chạy</SelectItem>
+              <SelectItem value="rating">Đánh giá cao</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">GIÁ</p>
+          <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
+            <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
+              <SelectValue>{(v: string) => priceLabelMap[v] ?? v}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(priceLabelMap).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">DANH MỤC</p>
+          <CategoryCascadeSelect
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            categories={categories}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">ĐÁNH GIÁ</p>
+          <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
+            <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
+              <SelectValue>{(v: string) => ({ all: "Tất cả", "4.5": "≥ 4.5 sao", "4.0": "≥ 4.0 sao", "3.5": "≥ 3.5 sao" })[v] ?? v}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="4.5">≥ 4.5 sao</SelectItem>
+              <SelectItem value="4.0">≥ 4.0 sao</SelectItem>
+              <SelectItem value="3.5">≥ 3.5 sao</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">SẮP XẾP</p>
-        <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
-          <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue>{(v: string) => ({ newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần", sold: "Bán chạy", rating: "Đánh giá cao" })[v] ?? v}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Mới nhất</SelectItem>
-            <SelectItem value="price_asc">Giá tăng dần</SelectItem>
-            <SelectItem value="price_desc">Giá giảm dần</SelectItem>
-            <SelectItem value="sold">Bán chạy</SelectItem>
-            <SelectItem value="rating">Đánh giá cao</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">GIÁ</p>
-        <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
-          <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue>{(v: string) => priceLabelMap[v] ?? v}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(priceLabelMap).map(([value, label]) => (
-              <SelectItem key={value} value={value}>{label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">DANH MỤC</p>
-        <CategoryCascadeSelect
-          value={categoryFilter}
-          onChange={setCategoryFilter}
-          categories={categories}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">ĐÁNH GIÁ</p>
-        <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
-          <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
-            <SelectValue>{(v: string) => ({ all: "Tất cả", "4.5": "≥ 4.5 sao", "4.0": "≥ 4.0 sao", "3.5": "≥ 3.5 sao" })[v] ?? v}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả</SelectItem>
-            <SelectItem value="4.5">≥ 4.5 sao</SelectItem>
-            <SelectItem value="4.0">≥ 4.0 sao</SelectItem>
-            <SelectItem value="3.5">≥ 3.5 sao</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="sm:col-span-2 lg:col-span-1">
+      <div>
         <Button
           type="button"
           variant="outline"
           onClick={clearFilters}
-          className="h-12 w-full lg:w-auto rounded-[14px] border border-[#D4AF7A]/55 bg-white px-5 text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A]"
+          className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/55 bg-white px-5 text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] lg:w-auto"
         >
           Đặt lại
         </Button>
