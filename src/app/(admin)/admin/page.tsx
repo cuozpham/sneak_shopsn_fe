@@ -43,11 +43,43 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Bảng điều khiển</h1>
+        <Skeleton className="h-8 w-52" />
+
+        {/* Stat cards — 8 cards matching actual layout */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-5 pb-4 space-y-2">
+                <Skeleton className="h-3 w-2/3" />
+                <Skeleton className="h-8 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <Skeleton className="h-64 rounded-xl" />
+
+        {/* Revenue chart card */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-44" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[220px] w-full rounded-lg" />
+          </CardContent>
+        </Card>
+
+        {/* Recent orders card */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-36" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

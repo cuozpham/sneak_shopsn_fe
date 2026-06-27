@@ -461,7 +461,19 @@ export default function ProductListingPage() {
           {loading ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-[4/5] rounded-[1.5rem]" />
+                <div key={i} className="overflow-hidden rounded-[1.5rem] border border-black/5 bg-white">
+                  <Skeleton className="aspect-[4/5] w-full rounded-none" />
+                  <div className="space-y-2 p-2.5 sm:space-y-3 sm:p-4">
+                    <div className="space-y-1">
+                      <Skeleton className="h-2.5 w-1/4" />
+                      <Skeleton className="h-3.5 w-3/4" />
+                      <Skeleton className="h-3.5 w-1/2" />
+                    </div>
+                    <Skeleton className="h-3 w-1/3" />
+                    <Skeleton className="h-4 w-2/5" />
+                    <Skeleton className="h-3 w-1/4" />
+                  </div>
+                </div>
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
