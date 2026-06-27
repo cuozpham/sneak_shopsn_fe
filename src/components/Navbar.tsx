@@ -276,8 +276,8 @@ export default function Navbar() {
         </div>
 
         <nav className="border-b border-black/5 bg-white/90 backdrop-blur-xl">
-          <div className="mx-auto grid w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center px-4 py-3 sm:px-6 sm:py-4">
-            <Link href="/" className="min-w-0 shrink-0">
+          <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-3 sm:px-6 sm:py-4">
+            <Link href="/" className="shrink-0">
               <div className="flex min-w-0 items-center">
                 <div className="min-w-0">
                   <div className="max-w-[8.5rem] truncate font-serif text-[1.2rem] font-bold leading-none tracking-[0.12em] text-[#B89047] sm:max-w-none sm:text-[1.75rem]">
@@ -287,7 +287,7 @@ export default function Navbar() {
               </div>
             </Link>
 
-            <div className={cn("hidden items-center justify-center gap-5 lg:flex", hasMoreCategories && "pr-8")}>
+            <div className={cn("hidden flex-1 items-center justify-center gap-5 lg:flex", hasMoreCategories && "pr-8")}>
               {visibleTopCategories.map((category) => {
                 const hasChildren = category.children.length > 0;
                 const active = pathname === "/products" && activeCategorySlug === category.slug;
@@ -382,7 +382,7 @@ export default function Navbar() {
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2" ref={dropdownRef}>
+            <div className="ml-auto flex items-center gap-1.5 sm:gap-2" ref={dropdownRef}>
               <button
                 type="button"
                 onMouseDown={(e) => {
