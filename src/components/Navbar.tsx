@@ -276,7 +276,7 @@ export default function Navbar() {
         </div>
 
         <nav className="border-b border-black/5 bg-white/90 backdrop-blur-xl">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4">
+          <div className="mx-auto grid w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center px-4 py-3 sm:px-6 sm:py-4">
             <Link href="/" className="min-w-0 shrink-0">
               <div className="flex min-w-0 items-center">
                 <div className="min-w-0">
@@ -287,7 +287,7 @@ export default function Navbar() {
               </div>
             </Link>
 
-            <div className="hidden flex-1 items-center justify-center pr-[12%] gap-5 lg:flex">
+            <div className={cn("hidden items-center justify-center gap-5 lg:flex", hasMoreCategories && "pr-8")}>
               {visibleTopCategories.map((category) => {
                 const hasChildren = category.children.length > 0;
                 const active = pathname === "/products" && activeCategorySlug === category.slug;
