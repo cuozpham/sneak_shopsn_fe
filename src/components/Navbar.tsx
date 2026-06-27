@@ -552,10 +552,10 @@ export default function Navbar() {
                 <Link
                   href="/products"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black/70 hover:bg-gray-50"
+                  className="flex items-center justify-between rounded-xl border border-black/5 bg-white px-3 py-3 text-sm font-medium uppercase tracking-[0.12em] text-black/80 hover:bg-gray-50"
                 >
-                  <ChevronRight className="h-4 w-4" />
-                  Xem tất cả sản phẩm
+                  Xem thêm
+                  <ChevronRight className="h-4 w-4 text-black/40" />
                 </Link>
                 <div className="grid gap-2 pt-2 sm:flex sm:flex-wrap">
                   {user ? (
