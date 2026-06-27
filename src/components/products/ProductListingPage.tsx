@@ -85,10 +85,10 @@ function CategoryCascadeSelect({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-1 flex rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg overflow-hidden">
-          <div className="min-w-[160px] py-2 border-r border-[#D4AF7A]/20">
+        <div className="absolute top-full left-0 z-50 mt-1 flex rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg overflow-hidden w-max">
+          <div className="py-2 border-r border-[#D4AF7A]/20">
             <div
-              className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] text-[#1A1A1A] ${value === "all" ? "font-semibold text-[#B68C4A]" : ""}`}
+              className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] whitespace-nowrap text-[#1A1A1A] ${value === "all" ? "font-semibold text-[#B68C4A]" : ""}`}
               onMouseEnter={() => { setHoveredMain(null); setHoveredSub(null); }}
               onClick={() => select("all")}
             >
@@ -100,7 +100,7 @@ function CategoryCascadeSelect({
               return (
                 <div
                   key={main.id}
-                  className={`px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:bg-[#FBF7EE] ${hoveredMain === main.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                  className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredMain === main.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
                   onMouseEnter={() => { setHoveredMain(main.id); setHoveredSub(null); }}
                   onClick={() => select(String(main.id))}
                 >
@@ -112,14 +112,14 @@ function CategoryCascadeSelect({
           </div>
 
           {activeSubs.length > 0 && (
-            <div className="min-w-[160px] py-2 border-r border-[#D4AF7A]/20">
+            <div className="py-2 border-r border-[#D4AF7A]/20">
               {activeSubs.map((sub) => {
                 const hasChildren = childCats(sub.id).length > 0;
                 const isSelected = String(sub.id) === value;
                 return (
                   <div
                     key={sub.id}
-                    className={`px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:bg-[#FBF7EE] ${hoveredSub === sub.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                    className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredSub === sub.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
                     onMouseEnter={() => setHoveredSub(sub.id)}
                     onClick={() => select(String(sub.id))}
                   >
@@ -132,13 +132,13 @@ function CategoryCascadeSelect({
           )}
 
           {activeChildren.length > 0 && (
-            <div className="min-w-[160px] py-2">
+            <div className="py-2">
               {activeChildren.map((child) => {
                 const isSelected = String(child.id) === value;
                 return (
                   <div
                     key={child.id}
-                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
+                    className={`px-4 py-2 text-sm cursor-pointer whitespace-nowrap hover:bg-[#FBF7EE] ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
                     onClick={() => select(String(child.id))}
                   >
                     {child.name}
