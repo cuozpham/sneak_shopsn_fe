@@ -549,6 +549,14 @@ export default function Navbar() {
             <div ref={mobileMenuRef} className="border-t border-black/5 bg-[#f7f7f5] px-4 py-4 lg:hidden">
               <div className="mx-auto max-w-7xl space-y-3">
                 {renderMobileCategoryTree(topCategories)}
+                <Link
+                  href="/products"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black/70 hover:bg-gray-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                  Xem tất cả sản phẩm
+                </Link>
                 <div className="grid gap-2 pt-2 sm:flex sm:flex-wrap">
                   {user ? (
                     <>
