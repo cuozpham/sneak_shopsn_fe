@@ -45,11 +45,7 @@ export default function CategoryPage() {
   }, [slug]);
 
   const handleViewMore = () => {
-    if (subcategories.length === 0) {
-      router.push(`/products?categorySlug=${slug}`);
-    } else {
-      setView("subcategories");
-    }
+    router.push(`/products?categorySlug=${slug}`);
   };
 
   if (loading) {
