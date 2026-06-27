@@ -192,7 +192,7 @@ function FilterPanel({
 
   return (
     <div className="flex flex-wrap items-end gap-4">
-      <div className="min-w-[240px] flex-1 space-y-2">
+      <div className="flex-1 min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">TÌM KIẾM</p>
         <div className="relative">
           <Input
@@ -205,7 +205,7 @@ function FilterPanel({
         </div>
       </div>
 
-      <div className="w-full min-w-[180px] flex-1 sm:w-auto sm:flex-initial space-y-2">
+      <div className="flex-1 min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">SẮP XẾP</p>
         <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
@@ -221,7 +221,7 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="w-full min-w-[190px] flex-1 sm:w-auto sm:flex-initial space-y-2">
+      <div className="flex-1 min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">GIÁ</p>
         <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
@@ -237,7 +237,7 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="w-full min-w-[160px] flex-1 sm:w-auto sm:flex-initial space-y-2">
+      <div className="flex-1 min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">DANH MỤC</p>
         <CategoryCascadeSelect
           value={categoryFilter}
@@ -246,7 +246,7 @@ function FilterPanel({
         />
       </div>
 
-      <div className="w-full min-w-[160px] flex-1 sm:w-auto sm:flex-initial space-y-2">
+      <div className="flex-1 min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">ĐÁNH GIÁ</p>
         <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
