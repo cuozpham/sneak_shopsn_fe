@@ -42,9 +42,17 @@ function CategoryCascadeSelect({
   categories: Category[];
 }) {
   const [open, setOpen] = useState(false);
-  const [hoveredMain, setHoveredMain] = useState<number | null>(null);
-  const [hoveredSub, setHoveredSub] = useState<number | null>(null);
+  const [expandedMain, setExpandedMain] = useState<number | null>(null);
+  const [expandedSub, setExpandedSub] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -66,9 +74,12 @@ function CategoryCascadeSelect({
   const select = (id: string) => {
     onChange(id);
     setOpen(false);
-    setHoveredMain(null);
-    setHoveredSub(null);
+    setExpandedMain(null);
+    setExpandedSub(null);
   };
+
+  const itemCls = (selected: boolean, active = false) =>
+    `px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between gap-3 hover:bg-[#FBF7EE] ${active ? "bg-[#FBF7EE]" : ""} ${selected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`;
 
   const panelCls = "absolute top-0 left-full z-50 rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg py-2 w-max";
 
@@ -83,14 +94,71 @@ function CategoryCascadeSelect({
         <ChevronDown className={`h-4 w-4 shrink-0 text-[#5A4E46] transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {open && (
+      {open && isMobile && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg py-2 max-h-[60vh] overflow-y-auto">
+          <div className={itemCls(value === "all")} onClick={() => select("all")}>
+            <span>Tất cả danh mục</span>
+          </div>
+          {mainCats.map((main) => {
+            const subs = subCats(main.id);
+            const isSelected = String(main.id) === value;
+            const isExpanded = expandedMain === main.id;
+            return (
+              <div key={main.id}>
+                <div
+                  className={itemCls(isSelected, isExpanded)}
+                  onClick={() => {
+                    if (subs.length === 0) { select(String(main.id)); return; }
+                    setExpandedMain(isExpanded ? null : main.id);
+                    setExpandedSub(null);
+                  }}
+                >
+                  <span>{main.name}</span>
+                  {subs.length > 0 && <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-[#5A4E46] transition-transform ${isExpanded ? "rotate-180" : ""}`} />}
+                </div>
+                {isExpanded && subs.map((sub) => {
+                  const children = childCats(sub.id);
+                  const isSubSelected = String(sub.id) === value;
+                  const isSubExpanded = expandedSub === sub.id;
+                  return (
+                    <div key={sub.id}>
+                      <div
+                        className={`${itemCls(isSubSelected, isSubExpanded)} pl-8`}
+                        onClick={() => {
+                          if (children.length === 0) { select(String(sub.id)); return; }
+                          setExpandedSub(isSubExpanded ? null : sub.id);
+                        }}
+                      >
+                        <span>{sub.name}</span>
+                        {children.length > 0 && <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-[#5A4E46] transition-transform ${isSubExpanded ? "rotate-180" : ""}`} />}
+                      </div>
+                      {isSubExpanded && children.map((child) => (
+                        <div
+                          key={child.id}
+                          className={`${itemCls(String(child.id) === value)} pl-12`}
+                          onClick={() => select(String(child.id))}
+                        >
+                          <span>{child.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {open && !isMobile && (
         <div className="absolute top-full left-0 z-50 mt-1 rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg py-2 w-max">
           <div
-            className={`px-4 py-2 text-sm cursor-pointer whitespace-nowrap hover:bg-[#FBF7EE] ${value === "all" ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
-            onMouseEnter={() => { setHoveredMain(null); setHoveredSub(null); }}
+            className={itemCls(value === "all")}
+            style={{ whiteSpace: "nowrap" }}
+            onMouseEnter={() => { setExpandedMain(null); setExpandedSub(null); }}
             onClick={() => select("all")}
           >
-            Tất cả danh mục
+            <span>Tất cả danh mục</span>
           </div>
           {mainCats.map((main) => {
             const subs = subCats(main.id);
@@ -98,15 +166,15 @@ function CategoryCascadeSelect({
             return (
               <div key={main.id} className="relative">
                 <div
-                  className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredMain === main.id ? "bg-[#FBF7EE]" : ""} ${isSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
-                  onMouseEnter={() => { setHoveredMain(main.id); setHoveredSub(null); }}
+                  className={itemCls(isSelected, expandedMain === main.id)}
+                  style={{ whiteSpace: "nowrap" }}
+                  onMouseEnter={() => { setExpandedMain(main.id); setExpandedSub(null); }}
                   onClick={() => select(String(main.id))}
                 >
                   <span>{main.name}</span>
                   {subs.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
                 </div>
-
-                {hoveredMain === main.id && subs.length > 0 && (
+                {expandedMain === main.id && subs.length > 0 && (
                   <div className={panelCls}>
                     {subs.map((sub) => {
                       const children = childCats(sub.id);
@@ -114,28 +182,26 @@ function CategoryCascadeSelect({
                       return (
                         <div key={sub.id} className="relative">
                           <div
-                            className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-4 whitespace-nowrap hover:bg-[#FBF7EE] ${hoveredSub === sub.id ? "bg-[#FBF7EE]" : ""} ${isSubSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
-                            onMouseEnter={() => setHoveredSub(sub.id)}
+                            className={itemCls(isSubSelected, expandedSub === sub.id)}
+                            style={{ whiteSpace: "nowrap" }}
+                            onMouseEnter={() => setExpandedSub(sub.id)}
                             onClick={() => select(String(sub.id))}
                           >
                             <span>{sub.name}</span>
                             {children.length > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#5A4E46]" />}
                           </div>
-
-                          {hoveredSub === sub.id && children.length > 0 && (
+                          {expandedSub === sub.id && children.length > 0 && (
                             <div className={panelCls}>
-                              {children.map((child) => {
-                                const isChildSelected = String(child.id) === value;
-                                return (
-                                  <div
-                                    key={child.id}
-                                    className={`px-4 py-2 text-sm cursor-pointer whitespace-nowrap hover:bg-[#FBF7EE] ${isChildSelected ? "font-semibold text-[#B68C4A]" : "text-[#1A1A1A]"}`}
-                                    onClick={() => select(String(child.id))}
-                                  >
-                                    {child.name}
-                                  </div>
-                                );
-                              })}
+                              {children.map((child) => (
+                                <div
+                                  key={child.id}
+                                  className={itemCls(String(child.id) === value)}
+                                  style={{ whiteSpace: "nowrap" }}
+                                  onClick={() => select(String(child.id))}
+                                >
+                                  <span>{child.name}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
@@ -192,7 +258,7 @@ function FilterPanel({
 
   return (
     <div className="flex flex-wrap items-end gap-4">
-      <div className="flex-1 min-w-[160px] space-y-2">
+      <div className="w-full sm:flex-1 sm:min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">TÌM KIẾM</p>
         <div className="relative">
           <Input
@@ -205,7 +271,7 @@ function FilterPanel({
         </div>
       </div>
 
-      <div className="flex-1 min-w-[160px] space-y-2">
+      <div className="w-full sm:flex-1 sm:min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">SẮP XẾP</p>
         <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
@@ -221,7 +287,7 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="flex-1 min-w-[160px] space-y-2">
+      <div className="w-full sm:flex-1 sm:min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">GIÁ</p>
         <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
@@ -237,7 +303,7 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="flex-1 min-w-[160px] space-y-2">
+      <div className="w-full sm:flex-1 sm:min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">DANH MỤC</p>
         <CategoryCascadeSelect
           value={categoryFilter}
@@ -246,7 +312,7 @@ function FilterPanel({
         />
       </div>
 
-      <div className="flex-1 min-w-[160px] space-y-2">
+      <div className="w-full sm:flex-1 sm:min-w-[160px] space-y-2">
         <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">ĐÁNH GIÁ</p>
         <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
           <SelectTrigger className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
