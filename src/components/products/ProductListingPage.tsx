@@ -85,7 +85,7 @@ function CategoryCascadeSelect({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-1 flex rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg overflow-hidden w-max">
+        <div className="absolute top-full left-0 z-50 mt-1 flex items-start rounded-[14px] border border-[#D4AF7A]/35 bg-white shadow-lg overflow-hidden w-max">
           <div className="py-2 border-r border-[#D4AF7A]/20">
             <div
               className={`px-4 py-2 text-sm cursor-pointer hover:bg-[#FBF7EE] whitespace-nowrap text-[#1A1A1A] ${value === "all" ? "font-semibold text-[#B68C4A]" : ""}`}
