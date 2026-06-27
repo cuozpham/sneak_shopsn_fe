@@ -162,7 +162,7 @@ export default function AdminShippingFeesPage() {
             <Input
               type="number"
               min="0"
-              step="1000"
+              step="1"
               value={fee}
               onChange={(e) => setFee(e.target.value)}
               required
