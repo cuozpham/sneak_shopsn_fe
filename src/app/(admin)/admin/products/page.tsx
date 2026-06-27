@@ -35,6 +35,16 @@ export default function AdminProductsPage() {
         ]);
         setProducts([...deletedRes.data.result.content, ...inactiveRes.data.result.content]);
         setTotalPages(Math.max(deletedRes.data.result.totalPages, inactiveRes.data.result.totalPages));
+      } else if (status === "out_of_stock") {
+        const r = await productsApi.adminSearch({
+          keyword: kw || undefined,
+          status: "active",
+          deleted: false,
+          page: 0,
+          size: 500,
+        });
+        setProducts(r.data.result.content.filter((p) => (p.stockQuantity ?? 0) === 0));
+        setTotalPages(1);
       } else {
         const r = await productsApi.adminSearch({
           keyword: kw || undefined,
