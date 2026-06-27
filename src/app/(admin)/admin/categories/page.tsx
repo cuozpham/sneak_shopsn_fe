@@ -396,7 +396,9 @@ export default function AdminCategoriesPage() {
   const editingDescendants = editing !== null
     ? new Set<number>([editing, ...getDescendantIds(activeCategories, editing)])
     : new Set<number>();
-  const parentOptions = activeCategories.filter((c) => !c.parentId && !editingDescendants.has(c.id));
+  const parentOptions = createForm.main.id !== null
+    ? activeCategories.filter((c) => c.parentId === createForm.main.id)
+    : [];
 
   const displayTree = buildCategoryTree(trashView ? deletedCategories : activeCategories);
   const rows: Array<{ node: CategoryNode; depth: number }> = [];
