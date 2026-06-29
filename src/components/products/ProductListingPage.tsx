@@ -265,11 +265,11 @@ function FilterPanel({
     "w-full rounded-[12px] border border-[#D4AF7A]/30 bg-white px-3.5 text-sm text-[#1A1A1A] shadow-[0_1px_3px_rgba(0,0,0,0.06)] focus:ring-2 focus:ring-[#D4AF7A]/25";
 
   return (
-    /* Mobile: 2-col grid. Desktop (md+): single flex row aligned at bottom */
-    <div className="grid grid-cols-2 gap-3 md:flex md:flex-nowrap md:items-end md:gap-5">
+    /* Mobile: flex column (each filter full width). Desktop (md+): single flex row aligned at bottom */
+    <div className="flex flex-col gap-3.5 md:flex-row md:flex-nowrap md:items-end md:gap-5">
 
-      {/* TÌM KIẾM — full width on mobile (col-span-2), flex-[2] on desktop */}
-      <div className="col-span-2 flex min-w-0 flex-col md:flex-[2]">
+      {/* TÌM KIẾM — full width on mobile, flex-[2] on desktop */}
+      <div className="flex min-w-0 flex-col md:flex-[2]">
         <label className={labelCls}>TÌM KIẾM</label>
         <Input
           value={keywordInput}
@@ -346,7 +346,7 @@ function FilterPanel({
         variant="outline"
         onClick={clearFilters}
         style={{ height: CONTROL_H }}
-        className="col-span-2 w-full shrink-0 rounded-[12px] border border-[#C9A96E]/50 bg-white px-5 text-sm text-[#4A3F35] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] md:w-auto"
+        className="w-full shrink-0 rounded-[12px] border border-[#C9A96E]/50 bg-white px-5 text-sm text-[#4A3F35] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] md:w-auto"
       >
         Đặt lại
       </Button>
