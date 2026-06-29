@@ -88,7 +88,7 @@ function CategoryCascadeSelect({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-left text-sm text-[#1A1A1A] shadow-sm flex items-center justify-between gap-2 focus:outline-none focus:ring-4 focus:ring-[#D4AF7A]/15"
+        className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-left text-sm text-[#1A1A1A] shadow-sm flex items-center justify-between gap-2 focus:outline-none focus:ring-4 focus:ring-[#D4AF7A]/15"
       >
         <span className="truncate">{displayLabel}</span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-[#5A4E46] transition-transform ${open ? "rotate-180" : ""}`} />
@@ -266,14 +266,14 @@ function FilterPanel({
             onChange={(e) => setKeywordInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") onSearchNow(); }}
             placeholder="Tìm sản phẩm"
-            className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-sm text-[#1A1A1A] shadow-sm placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-4 focus-visible:ring-[#D4AF7A]/15"
+            className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-sm text-[#1A1A1A] shadow-sm placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-4 focus-visible:ring-[#D4AF7A]/15"
           />
         </div>
 
         <div className="space-y-2">
           <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">SẮP XẾP</p>
           <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
-            <SelectTrigger style={{ height: "3rem" }} className="w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
+            <SelectTrigger style={{ height: "2.25rem" }} className="w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-sm text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
               <SelectValue>{(v: string) => ({ newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần", sold: "Bán chạy", rating: "Đánh giá cao" })[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -289,7 +289,7 @@ function FilterPanel({
         <div className="space-y-2">
           <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">GIÁ</p>
           <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
-            <SelectTrigger style={{ height: "3rem" }} className="w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
+            <SelectTrigger style={{ height: "2.25rem" }} className="w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-sm text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
               <SelectValue>{(v: string) => priceLabelMap[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -312,7 +312,7 @@ function FilterPanel({
         <div className="space-y-2">
           <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">ĐÁNH GIÁ</p>
           <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
-            <SelectTrigger style={{ height: "3rem" }} className="w-full rounded-[14px] border border-[#D4AF7A]/35 bg-white px-4 text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
+            <SelectTrigger style={{ height: "2.25rem" }} className="w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-sm text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15">
               <SelectValue>{(v: string) => ({ all: "Tất cả", "4.5": "≥ 4.5 sao", "4.0": "≥ 4.0 sao", "3.5": "≥ 3.5 sao" })[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -330,7 +330,7 @@ function FilterPanel({
           type="button"
           variant="outline"
           onClick={clearFilters}
-          className="h-12 w-full rounded-[14px] border border-[#D4AF7A]/55 bg-white px-5 text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] lg:w-auto"
+          className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/55 bg-white px-5 text-sm text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] lg:w-auto"
         >
           Đặt lại
         </Button>
