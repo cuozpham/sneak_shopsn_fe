@@ -259,16 +259,17 @@ function FilterPanel({
     over_10m: "> 10.000.000đ",
   };
 
-  const CONTROL_H = "2.625rem"; // 42px — all inputs, selects, button share this
-  const labelCls = "mb-2 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#4A3F35]";
+  const CONTROL_H = "2.625rem";
+  const labelCls = "mb-2 block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#4A3F35] md:tracking-[0.22em]";
   const selectTriggerCls =
     "w-full rounded-[12px] border border-[#D4AF7A]/30 bg-white px-3.5 text-sm text-[#1A1A1A] shadow-[0_1px_3px_rgba(0,0,0,0.06)] focus:ring-2 focus:ring-[#D4AF7A]/25";
 
   return (
-    <div className="flex flex-wrap items-end gap-4 lg:flex-nowrap lg:gap-5">
+    /* Mobile: 2-col grid. Desktop (md+): single flex row aligned at bottom */
+    <div className="grid grid-cols-2 gap-3 md:flex md:flex-nowrap md:items-end md:gap-5">
 
-      {/* TÌM KIẾM — flex:2 so it's wider */}
-      <div className="flex w-full min-w-0 flex-col sm:w-auto sm:flex-[2]">
+      {/* TÌM KIẾM — full width on mobile (col-span-2), flex-[2] on desktop */}
+      <div className="col-span-2 flex min-w-0 flex-col md:flex-[2]">
         <label className={labelCls}>TÌM KIẾM</label>
         <Input
           value={keywordInput}
@@ -281,7 +282,7 @@ function FilterPanel({
       </div>
 
       {/* SẮP XẾP */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-col md:flex-1">
         <label className={labelCls}>SẮP XẾP</label>
         <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
           <SelectTrigger style={{ height: CONTROL_H }} className={selectTriggerCls}>
@@ -298,7 +299,7 @@ function FilterPanel({
       </div>
 
       {/* GIÁ */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-col md:flex-1">
         <label className={labelCls}>GIÁ</label>
         <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
           <SelectTrigger style={{ height: CONTROL_H }} className={selectTriggerCls}>
@@ -313,7 +314,7 @@ function FilterPanel({
       </div>
 
       {/* DANH MỤC */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-col md:flex-1">
         <label className={labelCls}>DANH MỤC</label>
         <CategoryCascadeSelect
           value={categoryFilter}
@@ -324,7 +325,7 @@ function FilterPanel({
       </div>
 
       {/* ĐÁNH GIÁ */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-col md:flex-1">
         <label className={labelCls}>ĐÁNH GIÁ</label>
         <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
           <SelectTrigger style={{ height: CONTROL_H }} className={selectTriggerCls}>
@@ -339,13 +340,13 @@ function FilterPanel({
         </Select>
       </div>
 
-      {/* ĐẶT LẠI — no label, aligns to bottom via items-end on parent */}
+      {/* ĐẶT LẠI — full width on mobile (col-span-2), auto width on desktop */}
       <Button
         type="button"
         variant="outline"
         onClick={clearFilters}
         style={{ height: CONTROL_H }}
-        className="shrink-0 rounded-[12px] border border-[#C9A96E]/50 bg-white px-5 text-sm text-[#4A3F35] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A]"
+        className="col-span-2 w-full shrink-0 rounded-[12px] border border-[#C9A96E]/50 bg-white px-5 text-sm text-[#4A3F35] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] md:w-auto"
       >
         Đặt lại
       </Button>
