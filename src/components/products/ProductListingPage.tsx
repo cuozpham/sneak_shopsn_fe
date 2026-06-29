@@ -36,10 +36,12 @@ function CategoryCascadeSelect({
   value,
   onChange,
   categories,
+  controlHeight = "2.625rem",
 }: {
   value: string;
   onChange: (value: string) => void;
   categories: Category[];
+  controlHeight?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [expandedMain, setExpandedMain] = useState<number | null>(null);
@@ -88,7 +90,8 @@ function CategoryCascadeSelect({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-left text-sm text-[#1A1A1A] shadow-sm flex items-center justify-between gap-2 focus:outline-none focus:ring-4 focus:ring-[#D4AF7A]/15"
+        style={{ height: controlHeight }}
+        className="w-full rounded-[12px] border border-[#D4AF7A]/30 bg-white px-3.5 text-left text-sm text-[#1A1A1A] shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF7A]/25"
       >
         <span className="truncate">{displayLabel}</span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-[#5A4E46] transition-transform ${open ? "rotate-180" : ""}`} />
@@ -256,26 +259,32 @@ function FilterPanel({
     over_10m: "> 10.000.000đ",
   };
 
-  const triggerCls = "w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-sm text-[#1A1A1A] shadow-sm focus:ring-4 focus:ring-[#D4AF7A]/15";
-  const labelCls = "font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]";
+  const CONTROL_H = "2.625rem"; // 42px — all inputs, selects, button share this
+  const labelCls = "mb-2 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#4A3F35]";
+  const selectTriggerCls =
+    "w-full rounded-[12px] border border-[#D4AF7A]/30 bg-white px-3.5 text-sm text-[#1A1A1A] shadow-[0_1px_3px_rgba(0,0,0,0.06)] focus:ring-2 focus:ring-[#D4AF7A]/25";
 
   return (
-    <div className="flex flex-nowrap items-end gap-2 lg:gap-3">
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className={labelCls}>TÌM KIẾM</p>
+    <div className="flex flex-wrap items-end gap-4 lg:flex-nowrap lg:gap-5">
+
+      {/* TÌM KIẾM — flex:2 so it's wider */}
+      <div className="flex w-full min-w-0 flex-col sm:w-auto sm:flex-[2]">
+        <label className={labelCls}>TÌM KIẾM</label>
         <Input
           value={keywordInput}
           onChange={(e) => setKeywordInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") onSearchNow(); }}
           placeholder="Tìm sản phẩm"
-          className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/35 bg-white px-3 text-sm text-[#1A1A1A] shadow-sm placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-4 focus-visible:ring-[#D4AF7A]/15"
+          style={{ height: CONTROL_H }}
+          className="w-full rounded-[12px] border border-[#D4AF7A]/30 bg-white px-3.5 text-sm text-[#1A1A1A] shadow-[0_1px_3px_rgba(0,0,0,0.06)] placeholder:text-slate-400 focus-visible:border-[#B68C4A] focus-visible:ring-2 focus-visible:ring-[#D4AF7A]/25"
         />
       </div>
 
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className={labelCls}>SẮP XẾP</p>
+      {/* SẮP XẾP */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <label className={labelCls}>SẮP XẾP</label>
         <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
-          <SelectTrigger style={{ height: "2.25rem" }} className={triggerCls}>
+          <SelectTrigger style={{ height: CONTROL_H }} className={selectTriggerCls}>
             <SelectValue>{(v: string) => ({ newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần", sold: "Bán chạy", rating: "Đánh giá cao" })[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -288,10 +297,11 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className={labelCls}>GIÁ</p>
+      {/* GIÁ */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <label className={labelCls}>GIÁ</label>
         <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
-          <SelectTrigger style={{ height: "2.25rem" }} className={triggerCls}>
+          <SelectTrigger style={{ height: CONTROL_H }} className={selectTriggerCls}>
             <SelectValue>{(v: string) => priceLabelMap[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -302,19 +312,22 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className={labelCls}>DANH MỤC</p>
+      {/* DANH MỤC */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <label className={labelCls}>DANH MỤC</label>
         <CategoryCascadeSelect
           value={categoryFilter}
           onChange={setCategoryFilter}
           categories={categories}
+          controlHeight={CONTROL_H}
         />
       </div>
 
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className={labelCls}>ĐÁNH GIÁ</p>
+      {/* ĐÁNH GIÁ */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <label className={labelCls}>ĐÁNH GIÁ</label>
         <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
-          <SelectTrigger style={{ height: "2.25rem" }} className={triggerCls}>
+          <SelectTrigger style={{ height: CONTROL_H }} className={selectTriggerCls}>
             <SelectValue>{(v: string) => ({ all: "Tất cả", "4.5": "≥ 4.5 sao", "4.0": "≥ 4.0 sao", "3.5": "≥ 3.5 sao" })[v] ?? v}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -326,11 +339,13 @@ function FilterPanel({
         </Select>
       </div>
 
+      {/* ĐẶT LẠI — no label, aligns to bottom via items-end on parent */}
       <Button
         type="button"
         variant="outline"
         onClick={clearFilters}
-        className="h-9 shrink-0 rounded-[10px] border border-[#D4AF7A]/55 bg-white px-5 text-sm text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A]"
+        style={{ height: CONTROL_H }}
+        className="shrink-0 rounded-[12px] border border-[#C9A96E]/50 bg-white px-5 text-sm text-[#4A3F35] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A]"
       >
         Đặt lại
       </Button>
