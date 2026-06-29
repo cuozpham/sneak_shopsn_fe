@@ -257,8 +257,7 @@ function FilterPanel({
   };
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-      <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-end lg:grid-cols-6 lg:items-end">
         <div className="space-y-2">
           <p className="font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]">TÌM KIẾM</p>
           <Input
@@ -323,18 +322,15 @@ function FilterPanel({
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      <div>
         <Button
           type="button"
           variant="outline"
           onClick={clearFilters}
-          className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/55 bg-white px-5 text-sm text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A] lg:w-auto"
+          className="h-9 w-full rounded-[10px] border border-[#D4AF7A]/55 bg-white px-5 text-sm text-[#2B2420] transition-colors hover:bg-[#FBF7EE] hover:text-[#1A1A1A]"
         >
           Đặt lại
         </Button>
-      </div>
     </div>
   );
 }
