@@ -260,8 +260,8 @@ function FilterPanel({
   const labelCls = "font-serif text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2B2420]";
 
   return (
-    <div className="flex flex-nowrap items-end gap-2 overflow-x-auto lg:gap-3">
-      <div className="min-w-[110px] flex-1 space-y-1.5">
+    <div className="flex flex-nowrap items-end gap-2 lg:gap-3">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <p className={labelCls}>TÌM KIẾM</p>
         <Input
           value={keywordInput}
@@ -272,7 +272,7 @@ function FilterPanel({
         />
       </div>
 
-      <div className="min-w-[110px] flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <p className={labelCls}>SẮP XẾP</p>
         <Select value={sort} onValueChange={(value) => { if (value) setSort(value); }}>
           <SelectTrigger style={{ height: "2.25rem" }} className={triggerCls}>
@@ -288,7 +288,7 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="min-w-[110px] flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <p className={labelCls}>GIÁ</p>
         <Select value={pricePreset} onValueChange={(value) => { if (value) setPricePreset(value); }}>
           <SelectTrigger style={{ height: "2.25rem" }} className={triggerCls}>
@@ -302,7 +302,7 @@ function FilterPanel({
         </Select>
       </div>
 
-      <div className="min-w-[110px] flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <p className={labelCls}>DANH MỤC</p>
         <CategoryCascadeSelect
           value={categoryFilter}
@@ -311,7 +311,7 @@ function FilterPanel({
         />
       </div>
 
-      <div className="min-w-[110px] flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <p className={labelCls}>ĐÁNH GIÁ</p>
         <Select value={ratingFilter} onValueChange={(value) => { if (value) setRatingFilter(value); }}>
           <SelectTrigger style={{ height: "2.25rem" }} className={triggerCls}>
