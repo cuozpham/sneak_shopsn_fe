@@ -45,7 +45,7 @@ export default function ProductDetailPage() {
   const [previewMedia, setPreviewMedia] = useState<{ url: string; type: "image" | "video"; title: string } | null>(null);
   const [adding, setAdding] = useState(false);
   const [buying, setBuying] = useState(false);
-  const { setItems } = useCartStore();
+  const { setItems, addItem } = useCartStore();
   const { user } = useAuthStore();
   const { openProductChat } = useChatStore();
 
@@ -227,7 +227,6 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!product) return;
-    // if (!user) { toast.error("Vui lòng đăng nhập để thêm vào giỏ"); return; }
     if (product.variants.length > 0 && !selectedVariantId) {
       toast.error("Vui lòng chọn size"); return;
     }
@@ -236,14 +235,33 @@ export default function ProductDetailPage() {
     }
     setAdding(true);
     try {
-      await cartApi.addOrUpdate({
-        productId: product.id,
-        variantId: selectedVariantId ?? undefined,
-        colorId: selectedColorId ?? undefined,
-        quantity,
-      });
-      const cartRes = await cartApi.getCart();
-      setItems(cartRes.data.result);
+      if (user) {
+        await cartApi.addOrUpdate({
+          productId: product.id,
+          variantId: selectedVariantId ?? undefined,
+          colorId: selectedColorId ?? undefined,
+          quantity,
+        });
+        const cartRes = await cartApi.getCart();
+        setItems(cartRes.data.result);
+      } else {
+        const pickedColor = selectedVariant?.colors.find((c) => c.id === selectedColorId) ?? null;
+        const basePrice = selectedVariant?.price ? Number(selectedVariant.price) : Number(product.price);
+        const finalPrice = basePrice * (1 - (product.discountPercent ?? 0) / 100);
+        const syntheticId = -(product.id * 1_000_000 + (selectedVariantId ?? 0) * 1000 + (selectedColorId ?? 0));
+        addItem({
+          id: syntheticId,
+          productId: product.id,
+          productName: product.name,
+          productImage: pickedColor?.imageUrl ?? product.coverImageUrl ?? null,
+          variantId: selectedVariantId,
+          variantName: selectedVariant?.size ? `Size ${selectedVariant.size}` : null,
+          colorId: selectedColorId,
+          colorName: pickedColor?.color ?? null,
+          price: Math.round(finalPrice),
+          quantity,
+        });
+      }
       toast.success("Đã thêm vào giỏ hàng!");
     } catch (err: unknown) {
       toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Có lỗi xảy ra");

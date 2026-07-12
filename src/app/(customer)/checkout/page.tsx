@@ -369,7 +369,14 @@ export default function CheckoutPage() {
               colorId: item.colorId,
               quantity: item.quantity,
             }))
-          : undefined,
+          : !user
+            ? items.map((item) => ({
+                productId: item.productId,
+                variantId: item.variantId ?? undefined,
+                colorId: item.colorId ?? undefined,
+                quantity: item.quantity,
+              }))
+            : undefined,
       });
       if (isBuyNow) {
         sessionStorage.removeItem("sneakshop_buy_now_items");

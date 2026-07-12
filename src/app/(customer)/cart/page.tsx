@@ -16,7 +16,7 @@ import type { CartItem } from "@/lib/types";
 
 export default function CartPage() {
   const { user, hydrated } = useAuthStore();
-  const { items, setItems, total } = useCartStore();
+  const { items, setItems, total, updateQuantity, removeItem } = useCartStore();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -32,7 +32,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    // if (!user) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     cartApi.getCart()
       .then((r) => setItems(r.data.result))
       .catch(() => {})
@@ -54,9 +54,13 @@ export default function CartPage() {
   const handleUpdateQty = async (item: CartItem, qty: number) => {
     setUpdating(item.id);
     try {
-      await cartApi.updateQuantity(item.id, qty);
-      const r = await cartApi.getCart();
-      setItems(r.data.result);
+      if (user) {
+        await cartApi.updateQuantity(item.id, qty);
+        const r = await cartApi.getCart();
+        setItems(r.data.result);
+      } else {
+        updateQuantity(item.id, qty);
+      }
     } catch {
       toast.error("Không thể cập nhật số lượng");
     } finally {
@@ -67,8 +71,12 @@ export default function CartPage() {
   const handleRemove = async (itemId: number) => {
     setUpdating(itemId);
     try {
-      await cartApi.removeItem(itemId);
-      setItems(items.filter((i) => i.id !== itemId));
+      if (user) {
+        await cartApi.removeItem(itemId);
+        setItems(items.filter((i) => i.id !== itemId));
+      } else {
+        removeItem(itemId);
+      }
       setSelectedIds((prev) => {
         const next = new Set(prev);
         next.delete(itemId);
