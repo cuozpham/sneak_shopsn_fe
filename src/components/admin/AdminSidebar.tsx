@@ -92,8 +92,7 @@ export default function AdminSidebar() {
         <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3 lg:hidden">
           <div className="min-w-0">
             <h1 className="font-black text-white">MANDRO ADMIN</h1>
-            {user && <p className="truncate text-xs text-gray-400">{user.email}</p>}
-          </div>
+                      </div>
           <button
             onClick={() => setMobileOpen((v) => !v)}
             className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white"
