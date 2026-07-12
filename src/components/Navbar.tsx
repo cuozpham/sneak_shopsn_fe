@@ -10,6 +10,7 @@ import { useCartStore } from "@/store/cart";
 import NotificationBell from "@/components/NotificationBell";
 import { categoriesApi } from "@/lib/api/categories";
 import { productsApi } from "@/lib/api/products";
+import { cartApi } from "@/lib/api/cart";
 import type { Category, Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +59,8 @@ const buildCategoryTree = (items: Category[]): CategoryNode[] => {
 export default function Navbar() {
   const { user, logout } = useAuthStore();
   const count = useCartStore((s) => s.count());
+  const cartItems = useCartStore((s) => s.items);
+  const setCartItems = useCartStore((s) => s.setItems);
   const router = useRouter();
   const pathname = usePathname();
   const navSearchParams = useSearchParams();
@@ -88,6 +91,26 @@ export default function Navbar() {
     setSearchOpen(false);
     setMobileCatOpen(new Set());
   }, [pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    const guestItems = cartItems.filter((i) => i.id < 0);
+    if (guestItems.length === 0) return;
+    Promise.all(
+      guestItems.map((i) =>
+        cartApi.addOrUpdate({
+          productId: i.productId,
+          variantId: i.variantId ?? undefined,
+          colorId: i.colorId ?? undefined,
+          quantity: i.quantity,
+        }).catch(() => {})
+      )
+    )
+      .then(() => cartApi.getCart())
+      .then((r) => setCartItems(r.data.result))
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     setMounted(true);
