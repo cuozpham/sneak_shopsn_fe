@@ -32,7 +32,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!user) { setLoading(false); return; }
+    // if (!user) { setLoading(false); return; }
     cartApi.getCart()
       .then((r) => setItems(r.data.result))
       .catch(() => {})
@@ -137,16 +137,16 @@ export default function CartPage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <ShoppingBag className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Vui lòng đăng nhập</h2>
-        <p className="text-gray-500 mb-6">Đăng nhập để xem giỏ hàng của bạn</p>
-        <Link href="/login"><Button>Đăng nhập</Button></Link>
-      </div>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+  //       <ShoppingBag className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+  //       <h2 className="text-xl font-semibold mb-2">Vui lòng đăng nhập</h2>
+  //       <p className="text-gray-500 mb-6">Đăng nhập để xem giỏ hàng của bạn</p>
+  //       <Link href="/login"><Button>Đăng nhập</Button></Link>
+  //     </div>
+  //   );
+  // }
 
   if (loading) {
     return (
