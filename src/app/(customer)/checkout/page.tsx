@@ -74,7 +74,7 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !user) return;
     setRegionsLoading(true);
     vnRegions.provinces()
       .then((pvs) => setProvinces(pvs))
@@ -83,7 +83,7 @@ export default function CheckoutPage() {
   }, [hydrated, user]);
 
   useEffect(() => {
-    if (!hydrated || provinces.length === 0) return;
+    if (!hydrated || !user || provinces.length === 0) return;
     let alive = true;
 
     const applySavedAddress = async (addr: Address) => {
@@ -297,10 +297,10 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!ready) return;
     if (!hydrated) return;
-    // if (!user) {
-    //   router.push("/login");
-    //   return;
-    // }
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     if (buyNowItems.length === 0 && items.length === 0) {
       router.push("/cart");
       return;
@@ -386,7 +386,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!hydrated || !ready || (items.length === 0 && buyNowItems.length === 0)) {
+  if (!hydrated || !ready || !user || (items.length === 0 && buyNowItems.length === 0)) {
     return <div className="max-w-3xl mx-auto px-4 py-8"><Skeleton className="h-96" /></div>;
   }
 
