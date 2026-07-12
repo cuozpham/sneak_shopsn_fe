@@ -19,13 +19,8 @@ export default function ProductCard({ product }: { product: Product }) {
     product.discountPercent > 0
       ? product.price * (1 - product.discountPercent / 100)
       : null;
-  const totalStock =
-    product.stockQuantity ??
-    product.variants.reduce(
-      (sum, v) => sum + v.colors.reduce((s, c) => s + (c.stockQuantity ?? 0), 0),
-      0
-    );
-  const isOutOfStock = totalStock === 0 || product.status === "out_of_stock";
+  const totalStock = product.stockQuantity ?? 0;
+  const isOutOfStock = totalStock <= 0;
   const primaryMedia =
     product.media?.find((item) => getProductMediaUrl(item) && item.type !== "video") ??
     product.media?.[0] ??
