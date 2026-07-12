@@ -91,7 +91,7 @@ export default function AdminSidebar() {
         {/* Mobile header bar */}
         <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3 lg:hidden">
           <div className="min-w-0">
-            <h1 className="font-black text-white">SNEAK ADMIN</h1>
+            <h1 className="font-black text-white">MANDRO ADMIN</h1>
             {user && <p className="truncate text-xs text-gray-400">{user.email}</p>}
           </div>
           <button
@@ -156,7 +156,7 @@ export default function AdminSidebar() {
         {/* Desktop sidebar */}
         <div className="hidden min-h-screen flex-col border-r border-gray-800 bg-gray-900 text-gray-300 lg:flex">
           <div className="border-b border-gray-700 px-4 py-5">
-            <h1 className="font-black text-white text-lg">SNEAK ADMIN</h1>
+            <h1 className="font-black text-white text-lg">MANDRO ADMIN</h1>
             {user && <p className="mt-0.5 truncate text-xs text-gray-400">{user.email}</p>}
           </div>
 
