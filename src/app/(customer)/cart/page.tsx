@@ -67,6 +67,7 @@ export default function CartPage() {
   }, [items, selectionReady]);
 
   const handleUpdateQty = async (item: CartItem, qty: number) => {
+    if (qty < 1) return;
     setUpdating(item.id);
     try {
       if (user) {
@@ -241,8 +242,8 @@ export default function CartPage() {
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => handleUpdateQty(item, item.quantity - 1)}
-                    disabled={updating === item.id}
-                    className="w-7 h-7 border rounded-md flex items-center justify-center hover:bg-gray-50"
+                    disabled={updating === item.id || item.quantity <= 1}
+                    className="w-7 h-7 border rounded-md flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
