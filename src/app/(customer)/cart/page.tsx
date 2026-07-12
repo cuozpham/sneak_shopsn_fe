@@ -33,25 +33,10 @@ export default function CartPage() {
   useEffect(() => {
     if (!hydrated) return;
     if (!user) { setLoading(false); return; }
-    const guestItems = items.filter((i) => i.id < 0);
-    const migrate = guestItems.length > 0
-      ? Promise.all(
-          guestItems.map((i) =>
-            cartApi.addOrUpdate({
-              productId: i.productId,
-              variantId: i.variantId ?? undefined,
-              colorId: i.colorId ?? undefined,
-              quantity: i.quantity,
-            }).catch(() => {})
-          )
-        )
-      : Promise.resolve();
-    migrate
-      .then(() => cartApi.getCart())
+    cartApi.getCart()
       .then((r) => setItems(r.data.result))
       .catch(() => {})
       .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, user, setItems]);
 
   useEffect(() => {

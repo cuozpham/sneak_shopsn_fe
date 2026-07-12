@@ -92,10 +92,17 @@ export default function Navbar() {
     setMobileCatOpen(new Set());
   }, [pathname]);
 
+  const migratedForUserRef = useRef<number | null>(null);
   useEffect(() => {
     if (!user) return;
+    if (migratedForUserRef.current === user.id) return;
     const guestItems = cartItems.filter((i) => i.id < 0);
-    if (guestItems.length === 0) return;
+    if (guestItems.length === 0) {
+      migratedForUserRef.current = user.id;
+      return;
+    }
+    migratedForUserRef.current = user.id;
+    const idsToMigrate = new Set(guestItems.map((i) => i.id));
     Promise.all(
       guestItems.map((i) =>
         cartApi.addOrUpdate({
@@ -107,8 +114,14 @@ export default function Navbar() {
       )
     )
       .then(() => cartApi.getCart())
-      .then((r) => setCartItems(r.data.result))
-      .catch(() => {});
+      .then((r) => {
+        setCartItems(r.data.result);
+      })
+      .catch(() => {})
+      .finally(() => {
+        // remove any guest items still lingering after migration
+        setCartItems(useCartStore.getState().items.filter((i) => !idsToMigrate.has(i.id) || i.id >= 0));
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
