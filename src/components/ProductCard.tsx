@@ -43,97 +43,92 @@ export default function ProductCard({ product }: { product: Product }) {
         : "image";
 
   return (
-    <div className="group relative">
-      <Link
-        href={`/products/${product.slug}`}
-        className="block overflow-hidden rounded-[1.5rem] border border-black/5 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.05)] outline-none transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
-      >
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#f5f5f3]">
-          <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="pointer-events-none absolute inset-y-0 -left-1/2 z-20 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-[125%] group-hover:opacity-100 motion-reduce:hidden" />
-          {displayUrl ? (
-            displayType === "video" ? (
-              <video
-                src={displayUrl}
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
-                muted
-                playsInline
-                preload="metadata"
-              />
-            ) : (
-              <img
-                src={displayUrl}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
-                loading="lazy"
-                decoding="async"
-              />
-            )
+    <Link
+      href={`/products/${product.slug}`}
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)] outline-none transition-all duration-300 hover:-translate-y-1 hover:border-[#ee4d2d]/30 hover:shadow-[0_10px_28px_rgba(238,77,45,0.15)]"
+    >
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#f5f5f3]">
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-y-0 -left-1/2 z-20 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-[125%] group-hover:opacity-100 motion-reduce:hidden" />
+        {displayUrl ? (
+          displayType === "video" ? (
+            <video
+              src={displayUrl}
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
+              muted
+              playsInline
+              preload="metadata"
+            />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-4xl text-gray-300">
-              👟
-            </div>
-          )}
-          {displayType === "video" && (
-            <span className="absolute left-3 top-3 z-20 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium tracking-[0.16em] text-white backdrop-blur-sm">
-              VIDEO
+            <img
+              src={displayUrl}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
+              loading="lazy"
+              decoding="async"
+            />
+          )
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-4xl text-gray-300">
+            👟
+          </div>
+        )}
+        {displayType === "video" && (
+          <span className="absolute left-3 top-3 z-20 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium tracking-[0.16em] text-white backdrop-blur-sm">
+            VIDEO
+          </span>
+        )}
+        {product.discountPercent > 0 && (
+          <Badge className="absolute right-0 top-3 z-20 rounded-l-md rounded-r-none bg-[#ffd839] px-2 py-0.5 text-[11px] font-bold text-[#ee4d2d] shadow-none">
+            -{product.discountPercent}%
+          </Badge>
+        )}
+        {isOutOfStock && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40">
+            <span className="rounded bg-white/90 px-3 py-1 text-xs font-semibold text-[#ee4d2d]">
+              Hết hàng
             </span>
-          )}
-          {product.discountPercent > 0 && (
-            <Badge className="absolute left-3 top-3 z-20 rounded-full bg-red-500 text-white shadow-none">
-              -{product.discountPercent}%
-            </Badge>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1 p-2.5 sm:p-3.5">
+        <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#0B1F1A]/45 sm:text-[10px] sm:tracking-[0.24em]">
+          {product.shop?.name || "MANDRO"}
+        </p>
+        <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-[#111827] transition-colors duration-200 group-hover:text-[#ee4d2d] sm:text-[17px]">
+          {product.name}
+        </h3>
+
+        <div className="flex items-center gap-1 text-[10px] text-slate-500 sm:text-[11px]">
+          <Star className="h-3 w-3 fill-[#ffce3d] text-[#ffce3d]" />
+          <span>{formatRating(product.ratingAverage)}</span>
+          <span className="text-slate-300">•</span>
+          <span>Đã bán {product.soldCount ?? 0}</span>
+        </div>
+
+        <div className="flex items-baseline gap-1.5">
+          <span className={`text-[15px] font-semibold sm:text-[17px] ${discounted ? "text-[#ee4d2d]" : "text-[#111827]"}`}>
+            {formatVND(discounted ?? product.price)}
+          </span>
+          {discounted && (
+            <span className="text-[10px] text-slate-400 line-through sm:text-[11px]">
+              {formatVND(product.price)}
+            </span>
           )}
         </div>
 
-      </Link>
-
-      <div className="space-y-2 p-2.5 sm:space-y-3 sm:p-4">
-          <div>
-            <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#0B1F1A]/45 sm:text-[10px] sm:tracking-[0.24em]">
-              {product.shop?.name || "MANDRO"}
-            </p>
-            <h3 className="mt-0.5 line-clamp-2 text-[12px] font-medium leading-5 text-[#111827] transition-colors duration-200 group-hover:text-[#0B1F1A] sm:mt-1 sm:text-[15px] sm:leading-6">
-              {product.name}
-            </h3>
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-2">
-            <Star className="h-3 w-3 fill-[#D4AF37] text-[#D4AF37] sm:h-3.5 sm:w-3.5" />
-            <span className="text-[10px] text-slate-500 sm:text-xs">
-              {formatRating(product.ratingAverage)}
-            </span>
-            <span className="hidden text-xs text-slate-300 sm:inline">•</span>
-            <span className="hidden text-xs text-slate-500 sm:inline">
-              Đã bán {product.soldCount ?? 0}
-            </span>
-          </div>
-
-          <div className="flex items-baseline gap-1.5 sm:gap-2">
-            <span className={`text-sm font-semibold sm:text-base ${discounted ? "text-red-500" : "text-[#0B1F1A]"}`}>
-              {formatVND(discounted ?? product.price)}
-            </span>
-            {discounted && (
-              <span className="hidden text-xs text-slate-300 line-through sm:inline">
-                {formatVND(product.price)}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {isOutOfStock ? (
-              <span className="text-[10px] font-medium text-red-500">Hết hàng</span>
-            ) : (
-              <span className="text-[10px] text-gray-400">Còn {totalStock}</span>
-            )}
-            {product.variants.length > 0 && (
-              <span className="text-[10px] text-gray-300">·</span>
-            )}
-            {product.variants.length > 0 && (
-              <span className="text-[10px] text-gray-400">{product.variants.length} size</span>
-            )}
-          </div>
+        <div className="flex items-center justify-between gap-1 text-[10px] text-gray-500">
+          {isOutOfStock ? (
+            <span className="font-medium text-[#ee4d2d]">Hết hàng</span>
+          ) : (
+            <span>Còn {totalStock}</span>
+          )}
+          {product.variants.length > 0 && (
+            <span className="text-gray-400">{product.variants.length} size</span>
+          )}
         </div>
-    </div>
+      </div>
+    </Link>
   );
 }
