@@ -227,7 +227,7 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!product) return;
-    if (!user) { toast.error("Vui lòng đăng nhập để thêm vào giỏ"); return; }
+    // if (!user) { toast.error("Vui lòng đăng nhập để thêm vào giỏ"); return; }
     if (product.variants.length > 0 && !selectedVariantId) {
       toast.error("Vui lòng chọn size"); return;
     }
@@ -254,7 +254,7 @@ export default function ProductDetailPage() {
 
   const handleBuyNow = async () => {
     if (!product) return;
-    if (!user) { toast.error("Vui lòng đăng nhập để mua hàng"); return; }
+    // if (!user) { toast.error("Vui lòng đăng nhập để mua hàng"); return; }
     if (product.variants.length > 0 && !selectedVariantId) {
       toast.error("Vui lòng chọn size"); return;
     }

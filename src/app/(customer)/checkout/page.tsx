@@ -74,7 +74,7 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (!hydrated || !user) return;
+    if (!hydrated) return;
     setRegionsLoading(true);
     vnRegions.provinces()
       .then((pvs) => setProvinces(pvs))
@@ -83,7 +83,7 @@ export default function CheckoutPage() {
   }, [hydrated, user]);
 
   useEffect(() => {
-    if (!hydrated || !user || provinces.length === 0) return;
+    if (!hydrated || provinces.length === 0) return;
     let alive = true;
 
     const applySavedAddress = async (addr: Address) => {
@@ -297,18 +297,18 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!ready) return;
     if (!hydrated) return;
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+    // if (!user) {
+    //   router.push("/login");
+    //   return;
+    // }
     if (buyNowItems.length === 0 && items.length === 0) {
       router.push("/cart");
       return;
     }
       setForm((f) => ({
       ...f,
-      recipientName: f.recipientName || user.fullName || "",
-      recipientPhone: f.recipientPhone || user.phone || "",
+      recipientName: f.recipientName || user?.fullName || "",
+      recipientPhone: f.recipientPhone || user?.phone || "",
     }));
   }, [ready, hydrated, user, items.length, buyNowItems.length, router]);
 
@@ -345,7 +345,7 @@ export default function CheckoutPage() {
     }
     setLoading(true);
     try {
-      if (!user?.phone?.trim()) {
+      if (user && !user?.phone?.trim()) {
         const profileRes = await api.put("/api/user/profile", {
           phone: form.recipientPhone.trim(),
         });
@@ -378,7 +378,7 @@ export default function CheckoutPage() {
         clear();
       }
       toast.success("Đặt hàng thành công!");
-      router.push("/orders");
+      router.push(user ? "/orders" : "/");
     } catch (err: unknown) {
       toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Có lỗi xảy ra");
     } finally {
@@ -386,7 +386,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!hydrated || !ready || !user || (items.length === 0 && buyNowItems.length === 0)) {
+  if (!hydrated || !ready || (items.length === 0 && buyNowItems.length === 0)) {
     return <div className="max-w-3xl mx-auto px-4 py-8"><Skeleton className="h-96" /></div>;
   }
 
@@ -457,15 +457,6 @@ export default function CheckoutPage() {
                       />
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={addressForm.isDefault}
-                    onChange={(e) => setAddressForm((f) => ({ ...f, isDefault: e.target.checked }))}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                  Đặt làm địa chỉ mặc định
-                </label>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1 sm:col-span-2">
@@ -548,11 +539,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button type="button" onClick={() => void handleSaveAddress()} disabled={savingAddress}>
-                    {savingAddress ? "Đang lưu..." : "Lưu địa chỉ"}
-                  </Button>
-                </div>
               </div>
             </div>
 
