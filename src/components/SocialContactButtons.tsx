@@ -1,29 +1,23 @@
 "use client";
 
 const ZALO_URL = process.env.NEXT_PUBLIC_ZALO_URL || "https://zalo.me/0934762018";
-const MESSENGER_URL = process.env.NEXT_PUBLIC_MESSENGER_URL || "https://m.me/Cuozpham";
+const FACEBOOK_URL = process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/Cuozpham";
 
 export default function SocialContactButtons() {
   return (
     <div className="fixed bottom-24 right-6 z-[9997] flex flex-col gap-3">
       <a
-        href={MESSENGER_URL}
+        href={FACEBOOK_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Chat Messenger"
+        aria-label="Facebook"
         className="group flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:shadow-xl"
       >
         <svg viewBox="0 0 36 36" className="h-7 w-7">
-          <defs>
-            <linearGradient id="msgGrad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#00B2FF" />
-              <stop offset="1" stopColor="#006AFF" />
-            </linearGradient>
-          </defs>
-          <circle cx="18" cy="18" r="18" fill="url(#msgGrad)" />
+          <circle cx="18" cy="18" r="18" fill="#1877F2" />
           <path
             fill="#fff"
-            d="M18 8C12.5 8 8 12.1 8 17.1c0 2.8 1.4 5.4 3.7 7v3.9l3.4-1.9c.9.3 1.9.4 2.9.4 5.5 0 10-4.1 10-9.4S23.5 8 18 8zm1 12.4l-2.6-2.7-4.9 2.7 5.4-5.7 2.7 2.7 4.8-2.7-5.4 5.7z"
+            d="M20.5 19.5h2.6l.4-3.4h-3v-2.2c0-1 .3-1.7 1.7-1.7H23.7V9.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.3v2.4H14.5v3.4h2.6V28h3.4z"
           />
         </svg>
       </a>
