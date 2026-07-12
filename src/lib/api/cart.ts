@@ -12,7 +12,7 @@ export const cartApi = {
   }) => api.post<ApiResponse<CartItem>>("/api/cart", data),
 
   updateQuantity: (itemId: number, quantity: number) =>
-    api.patch<ApiResponse<CartItem>>(`/api/cart/${itemId}`, null, {
+    api.put<ApiResponse<CartItem>>(`/api/cart/${itemId}`, null, {
       params: { quantity },
     }),
 
