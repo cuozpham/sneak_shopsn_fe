@@ -114,6 +114,25 @@ export default function CartPage() {
     });
   };
 
+  const handleRemoveSelected = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Xóa ${selectedIds.size} sản phẩm đã chọn?`)) return;
+    const ids = Array.from(selectedIds);
+    try {
+      if (user) {
+        await Promise.all(ids.map((id) => cartApi.removeItem(id).catch(() => {})));
+        const r = await cartApi.getCart();
+        setItems(r.data.result);
+      } else {
+        ids.forEach((id) => removeItem(id));
+      }
+      setSelectedIds(new Set());
+      toast.success(`Đã xóa ${ids.length} sản phẩm`);
+    } catch {
+      toast.error("Không thể xóa các sản phẩm đã chọn");
+    }
+  };
+
   const handleCheckoutSelected = () => {
     if (selectedItems.length === 0) {
       toast.error("Vui lòng chọn ít nhất một sản phẩm");
@@ -195,9 +214,21 @@ export default function CartPage() {
               />
               Chọn tất cả
             </label>
-            <span className="text-xs text-gray-400">
-              Đã chọn {selectedItems.length} sản phẩm
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400">
+                Đã chọn {selectedItems.length} sản phẩm
+              </span>
+              {selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  onClick={handleRemoveSelected}
+                  className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600 transition hover:bg-red-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Xóa ({selectedIds.size})
+                </button>
+              )}
+            </div>
           </div>
           {items.map((item) => (
             <div key={item.id} className="bg-white border rounded-xl p-4 flex flex-col gap-4 sm:flex-row">
