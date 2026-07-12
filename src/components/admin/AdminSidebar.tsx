@@ -87,7 +87,7 @@ export default function AdminSidebar() {
         />
       )}
 
-      <aside className="relative z-40 flex-shrink-0 lg:min-h-screen lg:w-56">
+      <aside className="relative z-40 flex-shrink-0 lg:w-56 lg:self-stretch">
         {/* Mobile header bar */}
         <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3 lg:hidden">
           <div className="min-w-0">
@@ -154,7 +154,7 @@ export default function AdminSidebar() {
         </div>
 
         {/* Desktop sidebar */}
-        <div className="hidden min-h-screen flex-col border-r border-gray-800 bg-gray-900 text-gray-300 lg:flex">
+        <div className="hidden h-full min-h-screen flex-col border-r border-gray-800 bg-gray-900 text-gray-300 lg:flex">
           <div className="border-b border-gray-700 px-4 py-5">
             <h1 className="font-black text-white text-lg">MANDRO ADMIN</h1>
             {user && <p className="mt-0.5 truncate text-xs text-gray-400">{user.email}</p>}
