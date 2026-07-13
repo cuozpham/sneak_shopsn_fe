@@ -14,7 +14,8 @@ import { cartApi } from "@/lib/api/cart";
 import { reviewsApi } from "@/lib/api/reviews";
 import { toFrontendImageUrl } from "@/lib/image";
 import { getProductMediaUrl } from "@/lib/product-media";
-import { decodeReviewReply } from "@/lib/review-reply";
+import { decodeReviewReply, encodeReviewReply } from "@/lib/review-reply";
+import { publicApi } from "@/lib/api/public";
 import { useCartStore } from "@/store/cart";
 import { useAuthStore } from "@/store/auth";
 import { useChatStore } from "@/store/chat";
@@ -45,8 +46,9 @@ export default function ProductDetailPage() {
   const [previewMedia, setPreviewMedia] = useState<{ url: string; type: "image" | "video"; title: string } | null>(null);
   const [adding, setAdding] = useState(false);
   const [buying, setBuying] = useState(false);
-  const [shopReplyDraft, setShopReplyDraft] = useState<{ reviewId: number; text: string } | null>(null);
+  const [shopReplyDraft, setShopReplyDraft] = useState<{ reviewId: number; text: string; imageUrls: string[] } | null>(null);
   const [shopReplySaving, setShopReplySaving] = useState(false);
+  const [shopReplyUploading, setShopReplyUploading] = useState(false);
   const { setItems, addItem } = useCartStore();
   const { user } = useAuthStore();
   const { openProductChat } = useChatStore();
@@ -232,13 +234,38 @@ export default function ProductDetailPage() {
   const canReplyAsShop =
     user?.role === "admin" && productShopId != null && user.shopId === productShopId;
 
+  const handleShopReplyUpload = async (files: FileList | File[]) => {
+    if (!shopReplyDraft) return;
+    const arr = Array.from(files);
+    if (shopReplyDraft.imageUrls.length + arr.length > 5) {
+      toast.error("Tối đa 5 ảnh/video"); return;
+    }
+    setShopReplyUploading(true);
+    try {
+      const uploaded: string[] = [];
+      for (const f of arr) uploaded.push(await publicApi.upload(f));
+      setShopReplyDraft((d) => d ? { ...d, imageUrls: [...d.imageUrls, ...uploaded].slice(0, 5) } : d);
+    } catch {
+      toast.error("Không thể tải ảnh/video");
+    } finally {
+      setShopReplyUploading(false);
+    }
+  };
+
+  const handleShopReplyRemoveImage = (url: string) => {
+    setShopReplyDraft((d) => d ? { ...d, imageUrls: d.imageUrls.filter((u) => u !== url) } : d);
+  };
+
   const handleShopReplySubmit = async (reviewId: number) => {
     if (!shopReplyDraft || shopReplyDraft.reviewId !== reviewId) return;
-    const content = shopReplyDraft.text.trim();
-    if (!content) { toast.error("Nội dung không được để trống"); return; }
+    const text = shopReplyDraft.text.trim();
+    if (!text && shopReplyDraft.imageUrls.length === 0) { toast.error("Nội dung không được để trống"); return; }
     setShopReplySaving(true);
     try {
-      const res = await reviewsApi.storefrontShopReply(reviewId, content);
+      const encoded = shopReplyDraft.imageUrls.length > 0
+        ? encodeReviewReply(text, shopReplyDraft.imageUrls)
+        : text;
+      const res = await reviewsApi.storefrontShopReply(reviewId, encoded);
       const updated = res.data.result;
       setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, ...updated } : r)));
       setShopReplyDraft(null);
@@ -737,7 +764,7 @@ export default function ProductDetailPage() {
                             <button
                               type="button"
                               disabled={shopReplySaving}
-                              onClick={() => setShopReplyDraft({ reviewId: r.id, text: shopReply.text })}
+                              onClick={() => setShopReplyDraft({ reviewId: r.id, text: shopReply.text, imageUrls: shopReply.imageUrls })}
                               className="text-[10px] font-medium text-blue-600 hover:underline sm:text-xs"
                             >
                               Sửa
@@ -773,7 +800,7 @@ export default function ProductDetailPage() {
                   {canReplyAsShop && !r.shopReply && shopReplyDraft?.reviewId !== r.id && (
                     <button
                       type="button"
-                      onClick={() => setShopReplyDraft({ reviewId: r.id, text: "" })}
+                      onClick={() => setShopReplyDraft({ reviewId: r.id, text: "", imageUrls: [] })}
                       className="mt-2 text-[11px] font-medium text-[#ee4d2d] hover:underline sm:text-sm"
                     >
                       Trả lời với vai trò shop
@@ -786,25 +813,63 @@ export default function ProductDetailPage() {
                         placeholder="Viết phản hồi của shop..."
                         value={shopReplyDraft.text}
                         maxLength={1000}
-                        onChange={(e) => setShopReplyDraft({ reviewId: r.id, text: e.target.value })}
+                        onChange={(e) => setShopReplyDraft(shopReplyDraft ? { ...shopReplyDraft, text: e.target.value } : null)}
                       />
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setShopReplyDraft(null)}
-                          disabled={shopReplySaving}
-                          className="text-[11px] text-gray-500 hover:underline sm:text-sm"
-                        >
-                          Hủy
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleShopReplySubmit(r.id)}
-                          disabled={shopReplySaving || !shopReplyDraft.text.trim()}
-                          className="rounded-md bg-[#ee4d2d] px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-[#d4431f] disabled:opacity-50 sm:text-sm"
-                        >
-                          {shopReplySaving ? "Đang gửi..." : "Gửi"}
-                        </button>
+                      {shopReplyDraft.imageUrls.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {shopReplyDraft.imageUrls.map((url) => (
+                            <div key={url} className="relative h-16 w-16 overflow-hidden rounded-md border sm:h-20 sm:w-20">
+                              {inferMediaTypeFromUrl(url) === "video" ? (
+                                <video src={toFrontendImageUrl(url)} className="h-full w-full object-cover" muted playsInline />
+                              ) : (
+                                <img src={toFrontendImageUrl(url)} alt="" className="h-full w-full object-cover" />
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleShopReplyRemoveImage(url)}
+                                className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-[10px] text-white"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="cursor-pointer text-[11px] text-gray-600 hover:underline sm:text-sm">
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*,video/*"
+                            hidden
+                            disabled={shopReplyUploading}
+                            onChange={(e) => {
+                              if (e.target.files) {
+                                void handleShopReplyUpload(e.target.files);
+                                e.currentTarget.value = "";
+                              }
+                            }}
+                          />
+                          {shopReplyUploading ? "Đang tải..." : "+ Thêm ảnh/video"}
+                        </label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShopReplyDraft(null)}
+                            disabled={shopReplySaving}
+                            className="text-[11px] text-gray-500 hover:underline sm:text-sm"
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleShopReplySubmit(r.id)}
+                            disabled={shopReplySaving || shopReplyUploading || (!shopReplyDraft.text.trim() && shopReplyDraft.imageUrls.length === 0)}
+                            className="rounded-md bg-[#ee4d2d] px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-[#d4431f] disabled:opacity-50 sm:text-sm"
+                          >
+                            {shopReplySaving ? "Đang gửi..." : "Gửi"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
