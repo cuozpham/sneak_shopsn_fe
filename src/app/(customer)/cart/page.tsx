@@ -62,8 +62,8 @@ export default function CartPage() {
       } else {
         updateQuantity(item.id, qty);
       }
-    } catch {
-      toast.error("Không thể cập nhật số lượng");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể cập nhật số lượng");
     } finally {
       setUpdating(null);
     }
