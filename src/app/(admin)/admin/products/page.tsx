@@ -97,13 +97,32 @@ export default function AdminProductsPage() {
       if (p.featured) {
         await productsApi.adminSetFeatured(p.id, { featured: false, featuredOrder: null });
         toast.success("Đã bỏ ghim sản phẩm");
+        load(debouncedKeyword);
+        return;
+      }
+      const orderStr = prompt("Thứ tự hiển thị (số càng nhỏ càng lên đầu):", "1");
+      if (orderStr === null) return;
+      const order = Number(orderStr);
+      if (!Number.isFinite(order) || order < 1) { toast.error("Thứ tự không hợp lệ"); return; }
+      const beforeMap = new Map<number, number | null | undefined>();
+      try {
+        const before = await productsApi.adminListFeatured();
+        before.data.result.content.forEach((it) => beforeMap.set(it.id, it.featuredOrder ?? null));
+      } catch {}
+      await productsApi.adminSetFeatured(p.id, { featured: true, featuredOrder: order });
+      let shifted = 0;
+      try {
+        const after = await productsApi.adminListFeatured();
+        after.data.result.content.forEach((it) => {
+          if (it.id === p.id) return;
+          const prev = beforeMap.get(it.id);
+          if (prev !== undefined && prev !== (it.featuredOrder ?? null)) shifted += 1;
+        });
+      } catch {}
+      if (shifted > 0) {
+        toast.success(`Đã ghim ${p.name.slice(0, 30)}... tại vị trí ${order}. ${shifted} sản phẩm khác đã được đẩy xuống.`);
       } else {
-        const orderStr = prompt("Thứ tự hiển thị (số càng nhỏ càng lên đầu):", "1");
-        if (orderStr === null) return;
-        const order = Number(orderStr);
-        if (!Number.isFinite(order)) { toast.error("Thứ tự không hợp lệ"); return; }
-        await productsApi.adminSetFeatured(p.id, { featured: true, featuredOrder: order });
-        toast.success("Đã ghim sản phẩm");
+        toast.success(`Đã ghim sản phẩm tại vị trí ${order}`);
       }
       load(debouncedKeyword);
     } catch (err: unknown) {
