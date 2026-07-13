@@ -232,7 +232,7 @@ export default function AdminOrdersPage() {
       <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="max-h-[90vh] w-full max-w-2xl overflow-x-hidden overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Đơn hàng #{selected?.orderCode}</DialogTitle>
           </DialogHeader>
@@ -260,8 +260,8 @@ export default function AdminOrdersPage() {
                       <Image src={item.productImage} alt={item.productName} width={48} height={48} className="h-12 w-12 flex-shrink-0 rounded object-cover" />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm truncate">{item.productName}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="font-medium text-sm break-words line-clamp-2">{item.productName}</p>
+                      <p className="text-xs text-gray-400 break-words">
                         {[item.variantName, item.colorName].filter(Boolean).join(" · ")}
                       </p>
                     </div>
