@@ -30,8 +30,8 @@ export default function AdminProductsPage() {
     try {
       if (showDeleted) {
         const [deletedRes, inactiveRes] = await Promise.all([
-          productsApi.adminSearch({ keyword: kw || undefined, deleted: true, page, size: 10 }),
-          productsApi.adminSearch({ keyword: kw || undefined, status: "inactive", deleted: false, page, size: 10 }),
+          productsApi.adminSearch({ keyword: kw || undefined, deleted: true, page, size: 15 }),
+          productsApi.adminSearch({ keyword: kw || undefined, status: "inactive", deleted: false, page, size: 15 }),
         ]);
         setProducts([...deletedRes.data.result.content, ...inactiveRes.data.result.content]);
         setTotalPages(Math.max(deletedRes.data.result.totalPages, inactiveRes.data.result.totalPages));
@@ -51,7 +51,7 @@ export default function AdminProductsPage() {
           status: status || undefined,
           deleted: false,
           page,
-          size: 20,
+          size: 15,
         });
         setProducts(r.data.result.content.filter((p) => p.status !== "inactive"));
         setTotalPages(r.data.result.totalPages);
