@@ -103,6 +103,9 @@ export default function ProfilePage() {
   const handleSaveInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.fullName.trim()) { toast.error("Tên không được để trống"); return; }
+    if (form.birthDate && form.birthDate > new Date().toISOString().split("T")[0]) {
+      toast.error("Ngày sinh không được vượt quá ngày hiện tại"); return;
+    }
     setSaving(true);
     try {
       const r = await api.put("/api/user/profile", {
@@ -364,7 +367,12 @@ export default function ProfilePage() {
                 <input
                   type="date"
                   value={form.birthDate}
-                  onChange={(e) => setForm((f) => ({ ...f, birthDate: e.target.value }))}
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v && v > new Date().toISOString().split("T")[0]) return;
+                    setForm((f) => ({ ...f, birthDate: v }));
+                  }}
                   className="input-base"
                 />
               </Field>
