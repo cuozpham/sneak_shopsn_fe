@@ -6,7 +6,6 @@ import { Camera, Check, ChevronDown, Loader2, MapPin, Pencil, Plus, Star, Trash2
 import Image from "next/image";
 import { useAuthStore } from "@/store/auth";
 import { api, getError } from "@/lib/api";
-import { authApi } from "@/lib/api/auth";
 import { addressesApi } from "@/lib/api/addresses";
 import { formatDate } from "@/lib/format";
 import { vnRegions } from "@/lib/vn-regions";
@@ -39,11 +38,6 @@ export default function ProfilePage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({ username: "", email: "", fullName: "", phone: "", gender: "" as Gender, birthDate: "" });
-  const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [emailChangeStep, setEmailChangeStep] = useState<"request" | "confirm">("request");
-  const [newEmailDraft, setNewEmailDraft] = useState("");
-  const [emailOtp, setEmailOtp] = useState("");
-  const [emailChangeSaving, setEmailChangeSaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -104,45 +98,6 @@ export default function ProfilePage() {
       toast.success("Cập nhật ảnh thành công");
     } catch (err) { toast.error(getError(err)); }
     finally { setUploading(false); e.target.value = ""; }
-  };
-
-  const openEmailChange = () => {
-    setNewEmailDraft("");
-    setEmailOtp("");
-    setEmailChangeStep("request");
-    setEmailModalOpen(true);
-  };
-
-  const handleRequestEmailOtp = async () => {
-    const email = newEmailDraft.trim();
-    if (!email) { toast.error("Nhập email mới"); return; }
-    setEmailChangeSaving(true);
-    try {
-      await authApi.requestEmailChange(email);
-      toast.success("Đã gửi OTP tới email mới, kiểm tra hộp thư.");
-      setEmailChangeStep("confirm");
-    } catch (err) {
-      toast.error(getError(err));
-    } finally {
-      setEmailChangeSaving(false);
-    }
-  };
-
-  const handleConfirmEmailChange = async () => {
-    const email = newEmailDraft.trim();
-    const otp = emailOtp.trim();
-    if (!email || !otp) { toast.error("Nhập OTP"); return; }
-    setEmailChangeSaving(true);
-    try {
-      const r = await authApi.confirmEmailChange(email, otp);
-      setAuth({ ...r.data.result, accessToken: localStorage.getItem("token") ?? "", tokenType: "Bearer" });
-      setEmailModalOpen(false);
-      toast.success("Đổi email thành công");
-    } catch (err) {
-      toast.error(getError(err));
-    } finally {
-      setEmailChangeSaving(false);
-    }
   };
 
   const handleSaveInfo = async (e: React.FormEvent) => {
@@ -369,21 +324,12 @@ export default function ProfilePage() {
                 </div>
               </Field>
               <Field label="Email">
-                <div className="flex gap-2">
-                  <input
-                    value={form.email}
-                    readOnly
-                    type="email"
-                    className="input-base flex-1 bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                  <button
-                    type="button"
-                    onClick={openEmailChange}
-                    className="whitespace-nowrap rounded-xl border border-gray-200 px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
-                  >
-                    Đổi email
-                  </button>
-                </div>
+                <input
+                  value={form.email}
+                  readOnly
+                  type="email"
+                  className="input-base bg-gray-50 text-gray-500 cursor-not-allowed"
+                />
               </Field>
               <Field label="Vai trò">
                 <input value={user.role === "admin" ? "Quản trị viên" : "Khách hàng"} disabled className="input-base bg-gray-50 text-gray-400 cursor-not-allowed" />
@@ -606,57 +552,6 @@ export default function ProfilePage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {emailModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !emailChangeSaving && setEmailModalOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="mb-4 text-lg font-bold">Đổi email đăng nhập</h3>
-            {emailChangeStep === "request" ? (
-              <div className="space-y-3">
-                <p className="text-sm text-gray-500">Nhập email mới. Mã OTP xác nhận sẽ được gửi tới địa chỉ đó.</p>
-                <input
-                  type="email"
-                  value={newEmailDraft}
-                  onChange={(e) => setNewEmailDraft(e.target.value)}
-                  placeholder="email@example.com"
-                  className="input-base w-full"
-                  autoFocus
-                />
-                <div className="flex justify-end gap-2 pt-2">
-                  <button type="button" onClick={() => setEmailModalOpen(false)} disabled={emailChangeSaving} className="rounded-xl px-4 py-2 text-sm text-gray-500 hover:bg-gray-50">Hủy</button>
-                  <button type="button" onClick={handleRequestEmailOtp} disabled={emailChangeSaving || !newEmailDraft.trim()} className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-                    {emailChangeSaving ? "Đang gửi..." : "Gửi OTP"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm text-gray-500">
-                  Nhập mã OTP đã gửi tới <span className="font-semibold text-gray-900">{newEmailDraft}</span>.
-                </p>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={emailOtp}
-                  onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="6 số"
-                  className="input-base w-full tracking-widest"
-                  autoFocus
-                />
-                <div className="flex justify-between gap-2 pt-2">
-                  <button type="button" onClick={() => setEmailChangeStep("request")} disabled={emailChangeSaving} className="rounded-xl px-4 py-2 text-sm text-gray-500 hover:bg-gray-50">Đổi email khác</button>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => setEmailModalOpen(false)} disabled={emailChangeSaving} className="rounded-xl px-4 py-2 text-sm text-gray-500 hover:bg-gray-50">Hủy</button>
-                    <button type="button" onClick={handleConfirmEmailChange} disabled={emailChangeSaving || emailOtp.length !== 6} className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
-                      {emailChangeSaving ? "Đang xử lý..." : "Xác nhận"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

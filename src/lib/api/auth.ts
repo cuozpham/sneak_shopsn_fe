@@ -60,10 +60,4 @@ export const authApi = {
 
   resetPassword: (token: string, newPassword: string) =>
     api.post<ApiResponse<null>>("/api/auth/reset-password", { token, newPassword }),
-
-  requestEmailChange: (email: string) =>
-    api.post<ApiResponse<null>>("/api/user/profile/email/request", { email }),
-
-  confirmEmailChange: (email: string, otp: string) =>
-    api.post<ApiResponse<AuthResponse>>("/api/user/profile/email/confirm", { email, otp }),
 };
