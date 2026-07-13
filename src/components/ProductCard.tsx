@@ -44,6 +44,7 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative aspect-square overflow-hidden bg-[#f5f5f3]">
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-y-0 -left-1/2 z-20 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-[125%] group-hover:opacity-100 motion-reduce:hidden" />
         {displayUrl ? (
           displayType === "video" ? (
             <video
