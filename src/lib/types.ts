@@ -73,6 +73,8 @@ export interface Product {
   breadcrumb?: { label: string; href: string }[];
   soldCount?: number | null;
   createdAt: string;
+  shopId?: number | null;
+  shopName?: string | null;
   shop: { id: number; name: string } | null;
   categories: { id: number; name: string; slug: string }[];
   colors?: string[];

@@ -88,7 +88,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <div className="flex flex-1 flex-col gap-1 p-2.5 sm:p-3.5">
         <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#0B1F1A]/45 sm:text-[10px] sm:tracking-[0.24em]">
-          {product.shop?.name || "MANDRO"}
+          {product.shopName || product.shop?.name || "MANDRO"}
         </p>
         <h3 className="line-clamp-2 min-h-[2.5rem] text-[13px] font-semibold leading-snug text-[#111827] transition-colors duration-200 group-hover:text-[#ee4d2d] sm:min-h-[2.75rem] sm:text-[15px]">
           {product.name}

@@ -227,8 +227,10 @@ export default function ProductDetailPage() {
     toast.success("Đã sao chép liên kết sản phẩm");
   };
 
+  const productShopId = product?.shopId ?? product?.shop?.id ?? null;
+  const productShopName = product?.shopName ?? product?.shop?.name ?? null;
   const canReplyAsShop =
-    user?.role === "admin" && product?.shop?.id != null && user.shopId === product.shop.id;
+    user?.role === "admin" && productShopId != null && user.shopId === productShopId;
 
   const handleShopReplySubmit = async (reviewId: number) => {
     if (!shopReplyDraft || shopReplyDraft.reviewId !== reviewId) return;
@@ -724,7 +726,7 @@ export default function ProductDetailPage() {
                     <div className="mt-2 rounded-lg bg-gray-50 p-2.5 text-[11px] sm:p-3 sm:text-sm">
                       <div className="flex items-start justify-between gap-2">
                         <p className="min-w-0 flex-1">
-                          <span className="font-medium text-gray-700">Phản hồi từ {product.shop?.name || "shop"}: </span>
+                          <span className="font-medium text-gray-700">Phản hồi từ {productShopName || "shop"}: </span>
                           <span className="whitespace-pre-wrap text-gray-600 break-words">{shopReply.text}</span>
                           {r.shopReplyAt && (
                             <span className="ml-1 text-[10px] text-gray-400">· {formatDate(r.shopReplyAt)}</span>
