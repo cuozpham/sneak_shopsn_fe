@@ -623,9 +623,17 @@ export default function ProductDetailPage() {
               return (
                 <div key={r.id} className="rounded-xl border p-2.5 sm:p-4">
                   <div className="mb-2 flex items-start gap-2">
-                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold sm:h-9 sm:w-9 sm:text-sm">
-                      {r.userName[0]?.toUpperCase()}
-                    </div>
+                    {r.userAvatarUrl ? (
+                      <img
+                        src={toFrontendImageUrl(r.userAvatarUrl)}
+                        alt={r.userName}
+                        className="h-6 w-6 flex-shrink-0 rounded-full object-cover sm:h-9 sm:w-9"
+                      />
+                    ) : (
+                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold sm:h-9 sm:w-9 sm:text-sm">
+                        {r.userName[0]?.toUpperCase()}
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-medium sm:text-sm">{r.userName}</p>
                       <div className="flex gap-0.5">

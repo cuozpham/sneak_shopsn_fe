@@ -191,6 +191,7 @@ export interface Review {
   id: number;
   userId: number;
   userName: string;
+  userAvatarUrl: string | null;
   orderItemId: number | null;
   productId: number;
   productName: string;
