@@ -1,7 +1,7 @@
 "use client";
 
 const ZALO_URL = process.env.NEXT_PUBLIC_ZALO_URL || "https://zalo.me/0934762018";
-const MESSENGER_URL = process.env.NEXT_PUBLIC_MESSENGER_URL || "https://www.facebook.com/cuozpham";
+const MESSENGER_URL = process.env.NEXT_PUBLIC_MESSENGER_URL || "https://www.facebook.com/profile.php?id=61590226624889";
 
 export default function SocialContactButtons() {
   return (
