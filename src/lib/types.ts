@@ -65,6 +65,8 @@ export interface Product {
   sizeGuideNote: string | null;
   status: "active" | "inactive" | "out_of_stock";
   deleted?: boolean;
+  featured?: boolean;
+  featuredOrder?: number | null;
   ratingAverage: number;
   reviewCount: number;
   breadcrumb?: { label: string; href: string }[];

@@ -18,6 +18,15 @@ export const productsApi = {
   getBySlug: (slug: string) =>
     api.get<ApiResponse<Product>>(`/api/products/slug/${slug}`),
 
+  getFeatured: () =>
+    api.get<ApiResponse<Product[]>>("/api/products/featured"),
+
+  adminSetFeatured: (id: number, data: { featured: boolean; featuredOrder: number | null }) =>
+    api.patch<ApiResponse<Product>>(`/api/admin/products/${id}/featured`, data),
+
+  adminListFeatured: () =>
+    api.get<ApiResponse<PageResponse<Product>>>("/api/admin/products/featured"),
+
   getById: (id: number) =>
     api.get<ApiResponse<Product>>(`/api/admin/products/${id}`),
 

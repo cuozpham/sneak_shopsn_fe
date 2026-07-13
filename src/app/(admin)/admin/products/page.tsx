@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { productsApi } from "@/lib/api/products";
 import { formatRating, formatVND, formatDate } from "@/lib/format";
 import type { Product } from "@/lib/types";
-import { Search, Edit, Trash2, Plus } from "lucide-react";
+import { Search, Edit, Trash2, Plus, Pin, PinOff } from "lucide-react";
 import AdminPagination from "@/components/admin/AdminPagination";
 
 export default function AdminProductsPage() {
@@ -20,6 +20,7 @@ export default function AdminProductsPage() {
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [status, setStatus] = useState("");
   const [showDeleted, setShowDeleted] = useState(false);
+  const [showFeatured, setShowFeatured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -28,7 +29,11 @@ export default function AdminProductsPage() {
   const load = async (kw: string) => {
     setLoading(true);
     try {
-      if (showDeleted) {
+      if (showFeatured) {
+        const r = await productsApi.adminListFeatured();
+        setProducts(r.data.result.content);
+        setTotalPages(1);
+      } else if (showDeleted) {
         const [deletedRes, inactiveRes] = await Promise.all([
           productsApi.adminSearch({ keyword: kw || undefined, deleted: true, page, size: 15 }),
           productsApi.adminSearch({ keyword: kw || undefined, status: "inactive", deleted: false, page, size: 15 }),
@@ -60,7 +65,7 @@ export default function AdminProductsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(debouncedKeyword); }, [status, page, showDeleted, debouncedKeyword]);
+  useEffect(() => { load(debouncedKeyword); }, [status, page, showDeleted, showFeatured, debouncedKeyword]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -85,6 +90,25 @@ export default function AdminProductsPage() {
       toast.success("Đã chuyển sản phẩm vào thùng rác");
       load(debouncedKeyword);
     } catch { toast.error("Không thể chuyển sản phẩm vào thùng rác"); }
+  };
+
+  const handleTogglePin = async (p: Product) => {
+    try {
+      if (p.featured) {
+        await productsApi.adminSetFeatured(p.id, { featured: false, featuredOrder: null });
+        toast.success("Đã bỏ ghim sản phẩm");
+      } else {
+        const orderStr = prompt("Thứ tự hiển thị (số càng nhỏ càng lên đầu):", "1");
+        if (orderStr === null) return;
+        const order = Number(orderStr);
+        if (!Number.isFinite(order)) { toast.error("Thứ tự không hợp lệ"); return; }
+        await productsApi.adminSetFeatured(p.id, { featured: true, featuredOrder: order });
+        toast.success("Đã ghim sản phẩm");
+      }
+      load(debouncedKeyword);
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể cập nhật ghim");
+    }
   };
 
   return (
@@ -114,9 +138,17 @@ export default function AdminProductsPage() {
           </Select>
         )}
         <Button
+          variant={showFeatured ? "default" : "outline"}
+          className="w-full gap-2 sm:w-auto"
+          onClick={() => { setShowFeatured((v) => !v); setShowDeleted(false); setStatus(""); setPage(0); }}
+        >
+          <Pin className="w-4 h-4" />
+          {showFeatured ? "Xem tất cả" : "Đang ghim"}
+        </Button>
+        <Button
           variant={showDeleted ? "default" : "outline"}
           className="w-full gap-2 sm:w-auto"
-          onClick={() => { setShowDeleted((v) => !v); setStatus(""); setPage(0); }}
+          onClick={() => { setShowDeleted((v) => !v); setShowFeatured(false); setStatus(""); setPage(0); }}
         >
           <Trash2 className="w-4 h-4" />
           {showDeleted ? "Quay lại sản phẩm" : "Thùng rác"}
@@ -196,6 +228,11 @@ export default function AdminProductsPage() {
                               <Edit className="w-3 h-3" />
                             </Button>
                           </Link>
+                          <Button size="sm" variant="outline" className={`gap-1 ${p.featured ? "text-amber-600 hover:text-amber-700" : ""}`}
+                            onClick={() => handleTogglePin(p)}
+                            title={p.featured ? `Bỏ ghim (thứ tự ${p.featuredOrder ?? "-"})` : "Ghim vào nổi bật"}>
+                            {p.featured ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                          </Button>
                           <Button size="sm" variant="outline" className="gap-1 text-red-500 hover:text-red-600"
                             onClick={() => handleDelete(p.id)}>
                             <Trash2 className="w-3 h-3" />
@@ -269,6 +306,10 @@ export default function AdminProductsPage() {
                         <Edit className="w-3 h-3" />Sửa
                       </Button>
                     </Link>
+                    <Button size="sm" variant="outline" className={`gap-1 ${p.featured ? "text-amber-600" : ""}`}
+                      onClick={() => handleTogglePin(p)}>
+                      {p.featured ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                    </Button>
                     <Button size="sm" variant="outline" className="gap-1 text-red-500 hover:text-red-600"
                       onClick={() => handleDelete(p.id)}>
                       <Trash2 className="w-3 h-3" />
