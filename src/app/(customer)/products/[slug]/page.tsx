@@ -605,9 +605,24 @@ export default function ProductDetailPage() {
       )}
 
       {product.sizeGuideNote && (
-        <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[12px] text-gray-700 sm:mt-6 sm:p-5 sm:text-sm [&_img]:my-3 [&_img]:block [&_img]:h-[350px] [&_img]:w-full [&_img]:max-w-none [&_img]:rounded-lg [&_img]:object-cover [&_img]:object-center sm:[&_img]:h-[500px] [&_p:has(img)]:my-0 [&_p:has(img)]:overflow-hidden [&_p:has(img)]:rounded-lg">
+        <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[12px] text-gray-700 sm:mt-6 sm:p-5 sm:text-sm [&_img]:my-3 [&_img]:block [&_img]:h-[350px] [&_img]:w-full [&_img]:max-w-none [&_img]:cursor-zoom-in [&_img]:rounded-lg [&_img]:object-cover [&_img]:object-center [&_img]:transition [&_img]:duration-200 [&_img]:hover:opacity-90 sm:[&_img]:h-[500px] [&_p:has(img)]:my-0 [&_p:has(img)]:overflow-hidden [&_p:has(img)]:rounded-lg">
           <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
-          <ReactMarkdown>{product.sizeGuideNote}</ReactMarkdown>
+          <ReactMarkdown
+            components={{
+              img: ({ src, alt }) => {
+                const url = typeof src === "string" ? toFrontendImageUrl(src) : "";
+                return (
+                  <img
+                    src={url}
+                    alt={alt ?? "Hướng dẫn chọn size"}
+                    onClick={() => url && setPreviewMedia({ url, type: "image", title: "Hướng dẫn chọn size" })}
+                  />
+                );
+              },
+            }}
+          >
+            {product.sizeGuideNote}
+          </ReactMarkdown>
         </div>
       )}
 
