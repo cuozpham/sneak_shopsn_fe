@@ -605,7 +605,7 @@ export default function ProductDetailPage() {
       )}
 
       {product.sizeGuideNote && (
-        <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[12px] text-gray-700 sm:mt-6 sm:p-5 sm:text-sm">
+        <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[12px] text-gray-700 sm:mt-6 sm:p-5 sm:text-sm [&_img]:mx-auto [&_img]:my-3 [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_img]:rounded-lg [&_img]:object-contain sm:[&_img]:max-h-[600px]">
           <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
           <ReactMarkdown>{product.sizeGuideNote}</ReactMarkdown>
         </div>
