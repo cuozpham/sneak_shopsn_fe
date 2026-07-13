@@ -645,7 +645,7 @@ export default function ProductDetailPage() {
                     <span className="shrink-0 text-[10px] text-gray-400 sm:text-xs">{formatDate(r.createdAt)}</span>
                   </div>
                   {r.imageUrls.length > 0 && (
-                    <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {r.imageUrls.map((url) => {
                         const imageUrl = toFrontendImageUrl(url);
                         const mediaType = inferMediaTypeFromUrl(imageUrl);
@@ -654,12 +654,12 @@ export default function ProductDetailPage() {
                             key={url}
                             type="button"
                             onClick={() => setPreviewMedia({ url: imageUrl, type: mediaType, title: "Ảnh đánh giá của khách" })}
-                            className="group overflow-hidden rounded-xl border bg-gray-50 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            className="group h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border bg-gray-50 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:h-[120px] sm:w-[120px]"
                           >
                             {mediaType === "video" ? (
-                              <video src={imageUrl} className="block aspect-[4/3] w-full max-w-full object-cover" muted playsInline preload="metadata" />
+                              <video src={imageUrl} className="block h-full w-full object-cover" muted playsInline preload="metadata" />
                             ) : (
-                              <img src={imageUrl} alt="Ảnh đính kèm đánh giá" className="block aspect-[4/3] w-full max-w-full object-cover transition duration-200 group-hover:scale-105" />
+                              <img src={imageUrl} alt="Ảnh đính kèm đánh giá" className="block h-full w-full object-cover transition duration-200 group-hover:scale-105" />
                             )}
                           </button>
                         );
