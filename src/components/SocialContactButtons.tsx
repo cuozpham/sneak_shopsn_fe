@@ -5,7 +5,7 @@ const MESSENGER_URL = process.env.NEXT_PUBLIC_MESSENGER_URL || "https://www.face
 
 export default function SocialContactButtons() {
   return (
-    <div className="fixed bottom-24 right-6 z-[9997] flex flex-col gap-3">
+    <div className="fixed bottom-6 left-6 z-[9997] flex flex-col gap-3">
       <a
         href={MESSENGER_URL}
         target="_blank"
