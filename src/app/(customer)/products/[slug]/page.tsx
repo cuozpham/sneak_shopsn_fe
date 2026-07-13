@@ -594,21 +594,22 @@ export default function ProductDetailPage() {
             <Share2 className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
             Sao chép liên kết
           </Button>
-          {product.description && (
-            <div className="mt-3.5 sm:mt-6">
-              <h3 className="mb-1.5 text-[11px] font-semibold sm:text-base">Mô tả sản phẩm</h3>
-              <p className="text-[11px] leading-relaxed text-gray-600 sm:text-sm">{product.description}</p>
-            </div>
-          )}
-
-          {product.sizeGuideNote && (
-            <div className="prose prose-sm mt-3 max-w-none rounded-lg bg-gray-50 p-2.5 text-[11px] text-gray-700 sm:mt-4 sm:p-4 sm:text-sm">
-              <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
-              <ReactMarkdown>{product.sizeGuideNote}</ReactMarkdown>
-            </div>
-          )}
         </div>
       </div>
+
+      {product.description && (
+        <div className="mt-6 sm:mt-10">
+          <h3 className="mb-2 text-sm font-semibold sm:text-lg">Mô tả sản phẩm</h3>
+          <p className="text-[12px] leading-relaxed text-gray-600 sm:text-sm">{product.description}</p>
+        </div>
+      )}
+
+      {product.sizeGuideNote && (
+        <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[12px] text-gray-700 sm:mt-6 sm:p-5 sm:text-sm">
+          <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
+          <ReactMarkdown>{product.sizeGuideNote}</ReactMarkdown>
+        </div>
+      )}
 
       {/* Reviews */}
       <div className="mt-7 sm:mt-14">
