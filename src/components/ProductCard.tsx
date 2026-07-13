@@ -42,9 +42,8 @@ export default function ProductCard({ product }: { product: Product }) {
       href={`/products/${product.slug}`}
       className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-black/5 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)] outline-none transition-all duration-300 hover:-translate-y-1 hover:border-[#ee4d2d]/30 hover:shadow-[0_10px_28px_rgba(238,77,45,0.15)]"
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#f5f5f3]">
+      <div className="relative aspect-square overflow-hidden bg-[#f5f5f3]">
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div className="pointer-events-none absolute inset-y-0 -left-1/2 z-20 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-[125%] group-hover:opacity-100 motion-reduce:hidden" />
         {displayUrl ? (
           displayType === "video" ? (
             <video
@@ -74,24 +73,24 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
         {product.discountPercent > 0 && (
-          <Badge className="absolute right-0 top-3 z-20 rounded-l-md rounded-r-none bg-[#ffd839] px-2 py-0.5 text-[11px] font-bold text-[#ee4d2d] shadow-none">
+          <Badge className="absolute right-2 top-2 z-20 rounded-md bg-[#ffd839] px-2 py-0.5 text-[11px] font-bold text-[#ee4d2d] shadow-none">
             -{product.discountPercent}%
           </Badge>
         )}
         {isOutOfStock && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40">
-            <span className="rounded bg-white/90 px-3 py-1 text-xs font-semibold text-[#ee4d2d]">
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/45">
+            <span className="rounded-full bg-white/95 px-4 py-1 text-xs font-semibold text-[#ee4d2d] shadow-sm">
               Hết hàng
             </span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-1 p-2.5 sm:p-3.5">
+      <div className="flex flex-1 flex-col gap-1 p-2.5 sm:p-3.5">
         <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#0B1F1A]/45 sm:text-[10px] sm:tracking-[0.24em]">
           {product.shop?.name || "MANDRO"}
         </p>
-        <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-[#111827] transition-colors duration-200 group-hover:text-[#ee4d2d] sm:text-[17px]">
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-[13px] font-semibold leading-snug text-[#111827] transition-colors duration-200 group-hover:text-[#ee4d2d] sm:min-h-[2.75rem] sm:text-[15px]">
           {product.name}
         </h3>
 
@@ -103,7 +102,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="flex items-baseline gap-1.5">
-          <span className={`text-[15px] font-semibold sm:text-[17px] ${discounted ? "text-[#ee4d2d]" : "text-[#111827]"}`}>
+          <span className={`text-[14px] font-semibold sm:text-[16px] ${discounted ? "text-[#ee4d2d]" : "text-[#111827]"}`}>
             {formatVND(discounted ?? product.price)}
           </span>
           {discounted && (
@@ -113,15 +112,8 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-1 text-[10px] text-gray-500">
-          {isOutOfStock ? (
-            <span className="font-medium text-[#ee4d2d]">Hết hàng</span>
-          ) : (
-            <span>Còn {totalStock}</span>
-          )}
-          {product.variants.length > 0 && (
-            <span className="text-gray-400">{product.variants.length} size</span>
-          )}
+        <div className="mt-auto pt-1 text-[10px] text-gray-500">
+          {!isOutOfStock && totalStock > 0 ? <span>Còn {totalStock}</span> : <span className="invisible">.</span>}
         </div>
       </div>
     </Link>
