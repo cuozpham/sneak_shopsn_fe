@@ -46,4 +46,13 @@ export const reviewsApi = {
     api.post<ApiResponse<Review>>(`/api/admin/reviews/${reviewId}/reply`, {
       reply,
     }),
+
+  // Storefront shop reply (admin owning the shop)
+  storefrontShopReply: (reviewId: number, content: string) =>
+    api.put<ApiResponse<Review>>(`/api/reviews/${reviewId}/shop-reply`, {
+      content,
+    }),
+
+  storefrontDeleteShopReply: (reviewId: number) =>
+    api.delete<ApiResponse<Review>>(`/api/reviews/${reviewId}/shop-reply`),
 };

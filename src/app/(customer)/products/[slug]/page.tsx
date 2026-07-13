@@ -45,6 +45,8 @@ export default function ProductDetailPage() {
   const [previewMedia, setPreviewMedia] = useState<{ url: string; type: "image" | "video"; title: string } | null>(null);
   const [adding, setAdding] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [shopReplyDraft, setShopReplyDraft] = useState<{ reviewId: number; text: string } | null>(null);
+  const [shopReplySaving, setShopReplySaving] = useState(false);
   const { setItems, addItem } = useCartStore();
   const { user } = useAuthStore();
   const { openProductChat } = useChatStore();
@@ -223,6 +225,42 @@ export default function ProductDetailPage() {
   const copyProductUrl = async () => {
     await navigator.clipboard.writeText(window.location.href);
     toast.success("Đã sao chép liên kết sản phẩm");
+  };
+
+  const canReplyAsShop =
+    user?.role === "admin" && product?.shop?.id != null && user.shopId === product.shop.id;
+
+  const handleShopReplySubmit = async (reviewId: number) => {
+    if (!shopReplyDraft || shopReplyDraft.reviewId !== reviewId) return;
+    const content = shopReplyDraft.text.trim();
+    if (!content) { toast.error("Nội dung không được để trống"); return; }
+    setShopReplySaving(true);
+    try {
+      const res = await reviewsApi.storefrontShopReply(reviewId, content);
+      const updated = res.data.result;
+      setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, ...updated } : r)));
+      setShopReplyDraft(null);
+      toast.success("Đã phản hồi đánh giá");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể phản hồi");
+    } finally {
+      setShopReplySaving(false);
+    }
+  };
+
+  const handleShopReplyDelete = async (reviewId: number) => {
+    if (!window.confirm("Xóa phản hồi này?")) return;
+    setShopReplySaving(true);
+    try {
+      const res = await reviewsApi.storefrontDeleteShopReply(reviewId);
+      const updated = res.data.result;
+      setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, ...updated } : r)));
+      toast.success("Đã xóa phản hồi");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Không thể xóa phản hồi");
+    } finally {
+      setShopReplySaving(false);
+    }
   };
 
   const handleAddToCart = async () => {
@@ -684,10 +722,36 @@ export default function ProductDetailPage() {
                   {r.comment && <p className="mt-2 text-[11px] text-gray-700 sm:text-sm">{r.comment}</p>}
                   {r.shopReply && (
                     <div className="mt-2 rounded-lg bg-gray-50 p-2.5 text-[11px] sm:p-3 sm:text-sm">
-                      <p>
-                        <span className="font-medium text-gray-700">Phản hồi shop: </span>
-                        <span className="whitespace-pre-wrap text-gray-600">{shopReply.text}</span>
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="min-w-0 flex-1">
+                          <span className="font-medium text-gray-700">Phản hồi từ {product.shop?.name || "shop"}: </span>
+                          <span className="whitespace-pre-wrap text-gray-600 break-words">{shopReply.text}</span>
+                          {r.shopReplyAt && (
+                            <span className="ml-1 text-[10px] text-gray-400">· {formatDate(r.shopReplyAt)}</span>
+                          )}
+                        </p>
+                        {canReplyAsShop && (
+                          <div className="flex shrink-0 gap-1">
+                            <button
+                              type="button"
+                              disabled={shopReplySaving}
+                              onClick={() => setShopReplyDraft({ reviewId: r.id, text: shopReply.text })}
+                              className="text-[10px] font-medium text-blue-600 hover:underline sm:text-xs"
+                            >
+                              Sửa
+                            </button>
+                            <span className="text-[10px] text-gray-300 sm:text-xs">·</span>
+                            <button
+                              type="button"
+                              disabled={shopReplySaving}
+                              onClick={() => handleShopReplyDelete(r.id)}
+                              className="text-[10px] font-medium text-red-500 hover:underline sm:text-xs"
+                            >
+                              Xóa
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       {shopReply.imageUrls.length > 0 && (
                         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
                           {shopReply.imageUrls.map((url) => (
@@ -702,6 +766,44 @@ export default function ProductDetailPage() {
                           ))}
                         </div>
                       )}
+                    </div>
+                  )}
+                  {canReplyAsShop && !r.shopReply && shopReplyDraft?.reviewId !== r.id && (
+                    <button
+                      type="button"
+                      onClick={() => setShopReplyDraft({ reviewId: r.id, text: "" })}
+                      className="mt-2 text-[11px] font-medium text-[#ee4d2d] hover:underline sm:text-sm"
+                    >
+                      Trả lời với vai trò shop
+                    </button>
+                  )}
+                  {canReplyAsShop && shopReplyDraft?.reviewId === r.id && (
+                    <div className="mt-2 space-y-2 rounded-lg border border-gray-200 bg-white p-2.5 sm:p-3">
+                      <textarea
+                        className="w-full min-h-20 rounded-md border px-2 py-1.5 text-[11px] outline-none focus:border-black sm:text-sm"
+                        placeholder="Viết phản hồi của shop..."
+                        value={shopReplyDraft.text}
+                        maxLength={1000}
+                        onChange={(e) => setShopReplyDraft({ reviewId: r.id, text: e.target.value })}
+                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShopReplyDraft(null)}
+                          disabled={shopReplySaving}
+                          className="text-[11px] text-gray-500 hover:underline sm:text-sm"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleShopReplySubmit(r.id)}
+                          disabled={shopReplySaving || !shopReplyDraft.text.trim()}
+                          className="rounded-md bg-[#ee4d2d] px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-[#d4431f] disabled:opacity-50 sm:text-sm"
+                        >
+                          {shopReplySaving ? "Đang gửi..." : "Gửi"}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

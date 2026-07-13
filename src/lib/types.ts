@@ -32,6 +32,7 @@ export interface AuthResponse {
   gender: "MALE" | "FEMALE" | "OTHER" | null;
   birthDate: string | null;
   createdAt: string | null;
+  shopId: number | null;
   tokenType: string;
   accessToken: string;
 }
