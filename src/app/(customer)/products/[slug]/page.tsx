@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Star, Minus, Plus, ShoppingBag, Share2, MessageCircle, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import VideoThumb from "@/components/VideoThumb";
 import { productsApi } from "@/lib/api/products";
 import { cartApi } from "@/lib/api/cart";
 import { reviewsApi } from "@/lib/api/reviews";
@@ -665,9 +666,9 @@ export default function ProductDetailPage() {
       </div>
 
       {product.description && (
-        <div className="mt-6 sm:mt-10">
-          <h3 className="mb-2 text-sm font-semibold sm:text-lg">Mô tả sản phẩm</h3>
-          <p className="text-[12px] leading-relaxed text-gray-600 sm:text-sm">{product.description}</p>
+        <div className="mt-6 font-sans sm:mt-10" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+          <h3 className="mb-2 text-sm font-semibold leading-snug sm:text-lg">Mô tả sản phẩm</h3>
+          <p className="text-[12px] font-normal leading-relaxed text-gray-600 sm:text-sm">{product.description}</p>
         </div>
       )}
 
@@ -694,8 +695,8 @@ export default function ProductDetailPage() {
       )}
 
       {/* Reviews */}
-      <div className="mt-7 sm:mt-14">
-        <h2 className="mb-3 text-sm font-bold sm:mb-6 sm:text-xl">Đánh giá ({product.reviewCount})</h2>
+      <div className="mt-7 font-sans sm:mt-14" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+        <h2 className="mb-3 text-sm font-bold leading-snug sm:mb-6 sm:text-xl">Đánh giá ({product.reviewCount})</h2>
         {reviews.length === 0 ? (
           <p className="py-5 text-center text-[11px] text-gray-400 sm:py-8 sm:text-base">Chưa có đánh giá nào</p>
         ) : (
@@ -748,11 +749,11 @@ export default function ProductDetailPage() {
                           <button
                             key={url}
                             type="button"
-                            onClick={() => setPreviewMedia({ url: imageUrl, type: mediaType, title: "Ảnh đánh giá của khách" })}
-                            className="group h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border bg-gray-50 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:h-[120px] sm:w-[120px]"
+                            onClick={() => setPreviewMedia({ url: imageUrl, type: mediaType, title: mediaType === "video" ? "Video đánh giá của khách" : "Ảnh đánh giá của khách" })}
+                            className="group relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border bg-gray-50 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:h-[100px] sm:w-[100px]"
                           >
                             {mediaType === "video" ? (
-                              <video src={imageUrl} className="block h-full w-full object-cover" muted playsInline preload="metadata" />
+                              <VideoThumb src={imageUrl} />
                             ) : (
                               <img src={imageUrl} alt="Ảnh đính kèm đánh giá" className="block h-full w-full object-cover transition duration-200 group-hover:scale-105" />
                             )}
