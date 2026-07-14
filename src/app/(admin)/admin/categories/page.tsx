@@ -267,16 +267,30 @@ export default function AdminCategoriesPage() {
         let parentId: number | null = null;
 
         if (createForm.parent.enabled && parentName) {
-          const parentRes = await createCategory(parentName, mainId, createForm.parent.sortOrder);
-          parentId = parentRes.data.result.id;
+          if (createForm.parent.id !== null) {
+            parentId = createForm.parent.id;
+          } else {
+            const parentRes = await createCategory(parentName, mainId, createForm.parent.sortOrder);
+            parentId = parentRes.data.result.id;
+          }
         }
 
         if (createForm.child.enabled && createForm.child.name.trim()) {
-          await createCategory(
-            createForm.child.name,
-            parentId ?? mainId,
-            createForm.child.sortOrder
-          );
+          if (createForm.child.id !== null) {
+            await categoriesApi.adminUpdate(createForm.child.id, {
+              name: createForm.child.name.trim(),
+              slug: toSlug(createForm.child.name.trim()),
+              parentId: parentId ?? mainId,
+              sortOrder: createForm.child.sortOrder ? Number(createForm.child.sortOrder) : 0,
+              status: createForm.status,
+            });
+          } else {
+            await createCategory(
+              createForm.child.name,
+              parentId ?? mainId,
+              createForm.child.sortOrder
+            );
+          }
         }
         toast.success("Đã tạo danh mục");
       }
@@ -677,10 +691,14 @@ export default function AdminCategoriesPage() {
                       list={PARENT_DATALIST_ID}
                       autoComplete="off"
                       value={createForm.parent.name}
-                      onChange={(e) => setCreateForm((f) => ({
-                        ...f,
-                        parent: { ...f.parent, name: e.target.value },
-                      }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const matched = parentOptions.find((c) => c.name === value);
+                        setCreateForm((f) => ({
+                          ...f,
+                          parent: { ...f.parent, name: value, id: matched ? matched.id : null },
+                        }));
+                      }}
                       placeholder="Gõ để chọn hoặc nhập"
                     />
                     <datalist id={PARENT_DATALIST_ID}>
@@ -688,6 +706,9 @@ export default function AdminCategoriesPage() {
                         <option key={c.id} value={c.name} />
                       ))}
                     </datalist>
+                    {createForm.parent.id !== null && (
+                      <p className="mt-1 text-xs text-blue-600">Đang thêm vào danh mục cha hiện có</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium mb-1">STT</p>
