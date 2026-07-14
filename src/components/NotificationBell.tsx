@@ -168,13 +168,17 @@ export default function NotificationBell({ variant = "light", className }: Props
       return;
     }
 
-    if (orderCode) {
-      router.push(`/orders/${orderCode}`);
+    if (n.type.startsWith("review")) {
+      if (n.productSlug) {
+        router.push(`/products/${n.productSlug}#reviews`);
+        return;
+      }
+      router.push("/orders");
       return;
     }
 
-    if (n.type.startsWith("review")) {
-      router.push("/orders");
+    if (orderCode) {
+      router.push(`/orders/${orderCode}`);
       return;
     }
 

@@ -219,6 +219,8 @@ export interface Notification {
   imageUrl: string | null;
   type: string;
   orderCode?: string | null;
+  productId?: number | null;
+  productSlug?: string | null;
   isRead: boolean;
   createdAt: string;
 }

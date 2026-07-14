@@ -700,7 +700,12 @@ export default function ProductDetailPage() {
           <p className="py-5 text-center text-[11px] text-gray-400 sm:py-8 sm:text-base">Chưa có đánh giá nào</p>
         ) : (
           <div className="space-y-3.5">
-            {reviews.map((r) => {
+            {[...reviews].sort((a, b) => {
+              const aMine = user?.id != null && a.userId === user.id ? 0 : 1;
+              const bMine = user?.id != null && b.userId === user.id ? 0 : 1;
+              if (aMine !== bMine) return aMine - bMine;
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }).map((r) => {
               const shopReply = decodeReviewReply(r.shopReply);
               return (
                 <div key={r.id} className="rounded-xl border p-2.5 sm:p-4">
