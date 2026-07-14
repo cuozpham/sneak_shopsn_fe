@@ -728,8 +728,16 @@ export default function ProductDetailPage() {
                           <Star key={s} className={`h-2 w-2 sm:h-3 sm:w-3 ${s <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
                         ))}
                       </div>
+                      <p className="mt-0.5 text-[10px] text-gray-400 sm:text-xs">
+                        {formatDate(r.createdAt)}
+                        {(r.variantName || r.colorName) && (
+                          <>
+                            {" | Phân loại hàng: "}
+                            {[r.colorName, r.variantName].filter(Boolean).join(", ")}
+                          </>
+                        )}
+                      </p>
                     </div>
-                    <span className="shrink-0 text-[10px] text-gray-400 sm:text-xs">{formatDate(r.createdAt)}</span>
                   </div>
                   {r.imageUrls.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">

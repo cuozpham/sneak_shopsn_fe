@@ -200,6 +200,8 @@ export interface Review {
   orderItemId: number | null;
   productId: number;
   productName: string;
+  variantName?: string | null;
+  colorName?: string | null;
   shopId?: number | null;
   shopName?: string | null;
   rating: number;
