@@ -434,15 +434,59 @@ export default function Navbar() {
                   </button>
                   {moreMenuOpen && (
                     <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[14rem] rounded-2xl border border-black/8 bg-white py-2 shadow-2xl">
+                      <Link
+                        href="/products"
+                        onClick={() => setMoreMenuOpen(false)}
+                        className="mb-1 flex items-center justify-between border-b border-gray-100 px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-gray-50"
+                      >
+                        <span>Xem tất cả sản phẩm</span>
+                        <ChevronRight className="h-4 w-4 opacity-60" />
+                      </Link>
                       {hiddenTopCategories.map((cat) => (
-                        <Link
-                          key={cat.id}
-                          href={`/products?categorySlug=${encodeURIComponent(cat.slug)}`}
-                          onClick={() => setMoreMenuOpen(false)}
-                          className="block whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
-                        >
-                          {cat.name}
-                        </Link>
+                        <div key={cat.id} className="group/more relative">
+                          <Link
+                            href={`/products?categorySlug=${encodeURIComponent(cat.slug)}`}
+                            onClick={() => setMoreMenuOpen(false)}
+                            className="flex items-center justify-between whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
+                          >
+                            <span>{cat.name}</span>
+                            {cat.children.length > 0 && <ChevronRight className="h-4 w-4 opacity-40" />}
+                          </Link>
+                          {cat.children.length > 0 && (
+                            <div className="invisible absolute left-[calc(100%-1px)] top-0 z-50 min-w-[14rem] pl-1 opacity-0 transition-all duration-100 group-hover/more:visible group-hover/more:opacity-100">
+                              <div className="rounded-2xl border border-black/8 bg-white py-2 shadow-2xl">
+                                {cat.children.map((child) => (
+                                  <div key={child.id} className="group/sub relative">
+                                    <Link
+                                      href={`/products?categorySlug=${encodeURIComponent(child.slug)}`}
+                                      onClick={() => setMoreMenuOpen(false)}
+                                      className="flex items-center justify-between whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
+                                    >
+                                      <span>{child.name}</span>
+                                      {child.children.length > 0 && <ChevronRight className="h-4 w-4 opacity-40" />}
+                                    </Link>
+                                    {child.children.length > 0 && (
+                                      <div className="invisible absolute left-[calc(100%-1px)] top-0 z-50 min-w-[14rem] pl-1 opacity-0 transition-all duration-100 group-hover/sub:visible group-hover/sub:opacity-100">
+                                        <div className="rounded-2xl border border-black/8 bg-white py-2 shadow-2xl">
+                                          {child.children.map((grand) => (
+                                            <Link
+                                              key={grand.id}
+                                              href={`/products?categorySlug=${encodeURIComponent(grand.slug)}`}
+                                              onClick={() => setMoreMenuOpen(false)}
+                                              className="block whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
+                                            >
+                                              {grand.name}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
