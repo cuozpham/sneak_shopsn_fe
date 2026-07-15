@@ -34,6 +34,8 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, token: null, hydrated: true });
         if (typeof window !== "undefined") {
           localStorage.removeItem("token");
+          // Xóa cart local để không giữ giỏ của user vừa logout
+          import("@/store/cart").then((m) => m.useCartStore.getState().clear()).catch(() => {});
         }
       },
       isAdmin: () => get().user?.role === "admin",
