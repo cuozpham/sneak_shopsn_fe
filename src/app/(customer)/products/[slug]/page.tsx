@@ -396,16 +396,19 @@ export default function ProductDetailPage() {
   const colorImages = (product.variants ?? [])
     .flatMap((variant) => (variant.colors ?? []).map((color) => toFrontendImageUrl(color.imageUrl)))
     .filter((url): url is string => Boolean(url));
-  const imageItems: MediaAsset[] = [
-    ...mediaItems
-      .filter((item) => Boolean(getProductMediaUrl(item)))
-      .map((item) => ({
-        url: toFrontendImageUrl(getProductMediaUrl(item)),
-        type: item.type === "video" ? "video" : inferMediaTypeFromUrl(getProductMediaUrl(item)),
-      })),
-    ...(product.coverImageUrl ? [{ url: toFrontendImageUrl(product.coverImageUrl), type: "image" as const }] : []),
-    ...colorImages.map((url) => ({ url, type: "image" as const })),
-  ].filter((item, index, arr) => arr.findIndex((x) => x.url === item.url) === index);
+  const galleryItems: MediaAsset[] = mediaItems
+    .filter((item) => Boolean(getProductMediaUrl(item)))
+    .map((item) => ({
+      url: toFrontendImageUrl(getProductMediaUrl(item)),
+      type: item.type === "video" ? "video" : inferMediaTypeFromUrl(getProductMediaUrl(item)),
+    }));
+  const imageItems: MediaAsset[] = (galleryItems.length > 0
+    ? [...galleryItems, ...colorImages.map((url) => ({ url, type: "image" as const }))]
+    : [
+        ...(product.coverImageUrl ? [{ url: toFrontendImageUrl(product.coverImageUrl), type: "image" as const }] : []),
+        ...colorImages.map((url) => ({ url, type: "image" as const })),
+      ]
+  ).filter((item, index, arr) => arr.findIndex((x) => x.url === item.url) === index);
 
   return (
     <div className="mx-auto max-w-6xl overflow-x-hidden touch-pan-y px-2 py-3 sm:px-4 sm:py-10">
