@@ -199,16 +199,17 @@ export default function AdminProductFormPage() {
   const clearColorImageByName = (targetColor: string) => {
     const key = normalizeColor(targetColor);
     if (!key) return;
-    const removed: string[] = [];
+    // Đọc URL trước từ current state
+    const removed = variants.flatMap((v) =>
+      v.colors
+        .filter((c) => normalizeColor(c.color) === key && c.imageUrl)
+        .map((c) => c.imageUrl)
+    );
     setVariants((curr) => curr.map((variant) => ({
       ...variant,
-      colors: variant.colors.map((color) => {
-        if (normalizeColor(color.color) === key) {
-          if (color.imageUrl) removed.push(color.imageUrl);
-          return { ...color, imageUrl: "" };
-        }
-        return color;
-      }),
+      colors: variant.colors.map((color) =>
+        normalizeColor(color.color) === key ? { ...color, imageUrl: "" } : color
+      ),
     })));
     removed.forEach((url) => syncRemoveElsewhere(url, "variant"));
   };
