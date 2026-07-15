@@ -24,6 +24,18 @@ const moveItem = <T,>(items: T[], from: number, to: number) => {
   return next;
 };
 
+const OBJECT_POSITION_PRESETS = [
+  { value: "center", label: "Chính giữa" },
+  { value: "top", label: "Trên cùng" },
+  { value: "bottom", label: "Dưới cùng" },
+  { value: "left", label: "Trái" },
+  { value: "right", label: "Phải" },
+  { value: "top left", label: "Trên-trái" },
+  { value: "top right", label: "Trên-phải" },
+  { value: "bottom left", label: "Dưới-trái" },
+  { value: "bottom right", label: "Dưới-phải" },
+];
+
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,6 +49,7 @@ export default function AdminBannersPage() {
   const [objectPosition, setObjectPosition] = useState("center");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const objectPositionInputRef = useRef<HTMLInputElement>(null);
   const draggingFocusRef = useRef(false);
 
   const limit = selectedCategoryId === null ? 9 : 3;
@@ -279,15 +292,33 @@ export default function AdminBannersPage() {
             <div>
               <p className="font-semibold text-gray-900">Ảnh banner đang chọn</p>
               <p className="text-sm text-gray-500">
-                Kéo trên ảnh để chỉnh vùng focus, hoặc nhập object-position nếu muốn chỉnh tay.
+                Kéo trên ảnh để chỉnh vùng focus, hoặc chọn preset / nhập giá trị tùy chỉnh.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={OBJECT_POSITION_PRESETS.some((p) => p.value === objectPosition) ? objectPosition : "__custom__"}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "__custom__") {
+                    objectPositionInputRef.current?.focus();
+                    return;
+                  }
+                  setObjectPosition(v);
+                }}
+                className="rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black"
+              >
+                {OBJECT_POSITION_PRESETS.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+                <option value="__custom__">Tùy chỉnh...</option>
+              </select>
               <input
+                ref={objectPositionInputRef}
                 value={objectPosition}
                 onChange={(e) => setObjectPosition(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black sm:w-64"
-                placeholder="Ví dụ: center, top, center 30%"
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black sm:w-56"
+                placeholder="Vị trí focus (VD: 30% 70%)"
               />
               <Button onClick={() => void savePendingBanner()} disabled={!pendingFile || busyId !== null} className="shrink-0">
                 Lưu banner
