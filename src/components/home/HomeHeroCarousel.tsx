@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Banner } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,21 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
   }, [banners]);
 
   const [current, setCurrent] = useState(0);
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+
+  useEffect(() => {
+    videoRefs.current.forEach((el, id) => {
+      const slide = slides.find((s) => s.id === id);
+      const isActive = slide && slides.indexOf(slide) === current;
+      if (!el) return;
+      if (isActive) {
+        el.currentTime = 0;
+        void el.play().catch(() => {});
+      } else {
+        el.pause();
+      }
+    });
+  }, [current, slides]);
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -56,13 +71,17 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
             >
               {slide.isVideo ? (
                 <video
+                  ref={(el) => {
+                    if (el) videoRefs.current.set(slide.id, el);
+                    else videoRefs.current.delete(slide.id);
+                  }}
                   src={slide.imageUrl}
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{ objectPosition: slide.objectPosition }}
-                  autoPlay={isActive}
+                  autoPlay
                   muted
                   playsInline
-                  preload={index === 0 ? "auto" : "metadata"}
+                  preload="auto"
                   onEnded={() => {
                     if (isActive) setCurrent((prev) => (prev + 1) % slides.length);
                   }}
