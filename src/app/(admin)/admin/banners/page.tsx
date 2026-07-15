@@ -52,7 +52,7 @@ export default function AdminBannersPage() {
   const objectPositionInputRef = useRef<HTMLInputElement>(null);
   const draggingFocusRef = useRef(false);
 
-  const limit = selectedCategoryId === null ? 9 : 3;
+  const limit = 9;
 
   const orderedBanners = useMemo(() => sortBanners(banners), [banners]);
   const canAdd = orderedBanners.length < limit;

@@ -13,7 +13,7 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
         if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
         return b.id - a.id;
       })
-      .slice(0, 3)
+      .slice(0, 9)
       .map((banner) => ({
         id: banner.id,
         imageUrl: toFrontendImageUrl(banner.imageUrl),
