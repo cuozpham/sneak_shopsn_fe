@@ -31,11 +31,13 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
 
   useEffect(() => {
     if (slides.length <= 1) return;
-    const timer = window.setInterval(() => {
+    const active = slides[current];
+    if (active?.isVideo) return; // video tự advance khi onEnded
+    const timer = window.setTimeout(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 6000);
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
+    return () => window.clearTimeout(timer);
+  }, [slides, current]);
 
   const goTo = (next: number) => setCurrent((next + slides.length) % slides.length);
 
@@ -57,11 +59,13 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
                   src={slide.imageUrl}
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{ objectPosition: slide.objectPosition }}
-                  autoPlay
+                  autoPlay={isActive}
                   muted
-                  loop
                   playsInline
                   preload={index === 0 ? "auto" : "metadata"}
+                  onEnded={() => {
+                    if (isActive) setCurrent((prev) => (prev + 1) % slides.length);
+                  }}
                 />
               ) : (
                 <img
