@@ -214,25 +214,12 @@ export default function Navbar() {
     router.push("/");
   };
 
-  const MAX_VISIBLE_CATEGORIES = 5;
+  const MAX_VISIBLE_CATEGORIES = 6;
 
   const categoryTree = buildCategoryTree(categories);
   const topCategories = categoryTree.filter((c) => c.parentId == null);
   const visibleTopCategories = topCategories.slice(0, MAX_VISIBLE_CATEGORIES);
-  const hiddenTopCategories = topCategories.slice(MAX_VISIBLE_CATEGORIES);
-  const hasMoreCategories = hiddenTopCategories.length > 0;
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!moreMenuOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
-        setMoreMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [moreMenuOpen]);
+  const hasMoreCategories = topCategories.length > MAX_VISIBLE_CATEGORIES;
 
   const activeRoot = topCategories.find((c) => c.id === activeRootId) ?? null;
   const activeRootChildren = activeRoot?.children ?? [];
@@ -336,7 +323,7 @@ export default function Navbar() {
               </div>
             </Link>
 
-            <div className={cn("hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 overflow-hidden whitespace-nowrap lg:flex", hasMoreCategories && "pr-4")}>
+            <div className={cn("hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 whitespace-nowrap lg:flex", hasMoreCategories && "pr-4")}>
               {visibleTopCategories.map((category) => {
                 const hasChildren = category.children.length > 0;
                 const active = pathname === "/products" && activeCategorySlug === category.slug;
@@ -421,76 +408,13 @@ export default function Navbar() {
               })}
 
               {hasMoreCategories && (
-                <div ref={moreMenuRef} className="relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setMoreMenuOpen((v) => !v)}
-                    className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium uppercase tracking-[0.1em] text-black/60 transition-colors hover:bg-black/5 hover:text-black"
-                    aria-expanded={moreMenuOpen}
-                    aria-haspopup="true"
-                  >
-                    Xem thêm
-                    <ChevronDown className={cn("h-3.5 w-3.5 opacity-60 transition", moreMenuOpen && "rotate-180")} />
-                  </button>
-                  {moreMenuOpen && (
-                    <div className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[14rem] rounded-2xl border border-black/8 bg-white py-2 shadow-2xl">
-                      <Link
-                        href="/products"
-                        onClick={() => setMoreMenuOpen(false)}
-                        className="mb-1 flex items-center justify-between border-b border-gray-100 px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-gray-50"
-                      >
-                        <span>Xem tất cả sản phẩm</span>
-                        <ChevronRight className="h-4 w-4 opacity-60" />
-                      </Link>
-                      {hiddenTopCategories.map((cat) => (
-                        <div key={cat.id} className="group/more relative">
-                          <Link
-                            href={`/products?categorySlug=${encodeURIComponent(cat.slug)}`}
-                            onClick={() => setMoreMenuOpen(false)}
-                            className="flex items-center justify-between whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
-                          >
-                            <span>{cat.name}</span>
-                            {cat.children.length > 0 && <ChevronRight className="h-4 w-4 opacity-40" />}
-                          </Link>
-                          {cat.children.length > 0 && (
-                            <div className="invisible absolute left-[calc(100%-1px)] top-0 z-50 min-w-[14rem] pl-1 opacity-0 transition-all duration-100 group-hover/more:visible group-hover/more:opacity-100">
-                              <div className="rounded-2xl border border-black/8 bg-white py-2 shadow-2xl">
-                                {cat.children.map((child) => (
-                                  <div key={child.id} className="group/sub relative">
-                                    <Link
-                                      href={`/products?categorySlug=${encodeURIComponent(child.slug)}`}
-                                      onClick={() => setMoreMenuOpen(false)}
-                                      className="flex items-center justify-between whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
-                                    >
-                                      <span>{child.name}</span>
-                                      {child.children.length > 0 && <ChevronRight className="h-4 w-4 opacity-40" />}
-                                    </Link>
-                                    {child.children.length > 0 && (
-                                      <div className="invisible absolute left-[calc(100%-1px)] top-0 z-50 min-w-[14rem] pl-1 opacity-0 transition-all duration-100 group-hover/sub:visible group-hover/sub:opacity-100">
-                                        <div className="rounded-2xl border border-black/8 bg-white py-2 shadow-2xl">
-                                          {child.children.map((grand) => (
-                                            <Link
-                                              key={grand.id}
-                                              href={`/products?categorySlug=${encodeURIComponent(grand.slug)}`}
-                                              onClick={() => setMoreMenuOpen(false)}
-                                              className="block whitespace-nowrap px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-black"
-                                            >
-                                              {grand.name}
-                                            </Link>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <Link
+                  href="/products"
+                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium uppercase tracking-[0.1em] text-black/60 transition-colors hover:bg-black/5 hover:text-black"
+                >
+                  Xem thêm
+                  <ChevronRight className="h-3.5 w-3.5 opacity-60" />
+                </Link>
               )}
             </div>
 
