@@ -14,11 +14,17 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
         return b.id - a.id;
       })
       .slice(0, 9)
-      .map((banner) => ({
-        id: banner.id,
-        imageUrl: toFrontendImageUrl(banner.imageUrl),
-        objectPosition: banner.objectPosition || "center",
-      }));
+      .map((banner) => {
+        const url = toFrontendImageUrl(banner.imageUrl);
+        const clean = url.split("?")[0].toLowerCase();
+        const isVideo = /\.(mp4|webm|ogg|mov|m4v)$/.test(clean);
+        return {
+          id: banner.id,
+          imageUrl: url,
+          objectPosition: banner.objectPosition || "center",
+          isVideo,
+        };
+      });
   }, [banners]);
 
   const [current, setCurrent] = useState(0);
@@ -46,13 +52,26 @@ export default function HomeHeroCarousel({ banners }: { banners: Banner[] }) {
               key={slide.id}
               className={`absolute inset-0 transition-all duration-500 ease-out ${isActive ? "z-10 opacity-100 translate-x-0" : `z-0 opacity-0 ${directionClass}`}`}
             >
-              <img
-                src={slide.imageUrl}
-                alt="Banner trang chủ"
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{ objectPosition: slide.objectPosition }}
-                loading={index === 0 ? "eager" : "lazy"}
-              />
+              {slide.isVideo ? (
+                <video
+                  src={slide.imageUrl}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: slide.objectPosition }}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload={index === 0 ? "auto" : "metadata"}
+                />
+              ) : (
+                <img
+                  src={slide.imageUrl}
+                  alt="Banner trang chủ"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: slide.objectPosition }}
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+              )}
             </div>
           );
         })}

@@ -24,6 +24,11 @@ const moveItem = <T,>(items: T[], from: number, to: number) => {
   return next;
 };
 
+const isVideoUrl = (url: string) => {
+  const clean = url.split("?")[0].toLowerCase();
+  return /\.(mp4|webm|ogg|mov|m4v)$/.test(clean);
+};
+
 const OBJECT_POSITION_PRESETS = [
   { value: "center", label: "Chính giữa" },
   { value: "top", label: "Trên cùng" },
@@ -155,12 +160,15 @@ export default function AdminBannersPage() {
     e.target.value = "";
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Chỉ nhận file ảnh");
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+    if (!isImage && !isVideo) {
+      toast.error("Chỉ nhận file ảnh hoặc video");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Ảnh tối đa 10MB");
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(isVideo ? "Video tối đa 50MB" : "Ảnh tối đa 10MB");
       return;
     }
 
@@ -348,12 +356,24 @@ export default function AdminBannersPage() {
               draggingFocusRef.current = false;
             }}
           >
-            <img
-              src={pendingPreviewUrl}
-              alt="Xem trước banner"
-              className="block h-full w-full object-cover"
-              style={{ objectPosition }}
-            />
+            {(pendingFile?.type.startsWith("video/") || (pendingPreviewUrl && isVideoUrl(pendingPreviewUrl))) ? (
+              <video
+                src={pendingPreviewUrl}
+                className="block h-full w-full object-cover"
+                style={{ objectPosition }}
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <img
+                src={pendingPreviewUrl}
+                alt="Xem trước banner"
+                className="block h-full w-full object-cover"
+                style={{ objectPosition }}
+              />
+            )}
             <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
               <span className="rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">
                 Kéo để chỉnh vị trí
@@ -366,7 +386,7 @@ export default function AdminBannersPage() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         className="hidden"
         onChange={handleFileChange}
       />
@@ -389,12 +409,24 @@ export default function AdminBannersPage() {
               className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
             >
               <div className="relative aspect-[16/10] bg-gray-100">
-                <img
-                  src={toFrontendImageUrl(banner.imageUrl)}
-                  alt={`Banner ${index + 1}`}
-                  className="block h-full w-full object-cover"
-                  style={{ objectPosition: banner.objectPosition || "center" }}
-                />
+                {isVideoUrl(banner.imageUrl) ? (
+                  <video
+                    src={toFrontendImageUrl(banner.imageUrl)}
+                    className="block h-full w-full object-cover"
+                    style={{ objectPosition: banner.objectPosition || "center" }}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                  />
+                ) : (
+                  <img
+                    src={toFrontendImageUrl(banner.imageUrl)}
+                    alt={`Banner ${index + 1}`}
+                    className="block h-full w-full object-cover"
+                    style={{ objectPosition: banner.objectPosition || "center" }}
+                  />
+                )}
 
                 <div className="absolute left-3 top-3 flex items-center gap-2">
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs font-semibold text-white">
