@@ -21,21 +21,16 @@ export default function ProductCard({ product }: { product: Product }) {
       : null;
   const totalStock = product.stockQuantity ?? 0;
   const isOutOfStock = totalStock <= 0;
-  const primaryMedia =
+  const fallbackMedia =
     product.media?.find((item) => getProductMediaUrl(item) && item.type !== "video") ??
     product.media?.[0] ??
     null;
   const displayUrl =
-    toFrontendImageUrl(getProductMediaUrl(primaryMedia)) ||
     toFrontendImageUrl(product.coverImageUrl) ||
+    toFrontendImageUrl(getProductMediaUrl(fallbackMedia)) ||
     toFrontendImageUrl(product.variants.flatMap((variant) => variant.colors.map((color) => color.imageUrl)).find(Boolean)) ||
     null;
-  const displayType =
-    primaryMedia?.type === "video"
-      ? "video"
-      : displayUrl
-        ? inferMediaTypeFromUrl(displayUrl)
-        : "image";
+  const displayType = displayUrl ? inferMediaTypeFromUrl(displayUrl) : "image";
 
   return (
     <Link
