@@ -11,12 +11,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { SaveOnExitDialog } from "@/components/ui/save-on-exit-dialog";
 import { usersApi } from "@/lib/api/users";
+import { useAuthStore } from "@/store/auth";
 import { formatDate } from "@/lib/format";
 import type { User } from "@/lib/types";
 import { Lock, Unlock, UserCog } from "lucide-react";
 import AdminPagination from "@/components/admin/AdminPagination";
 
 export default function AdminUsersPage() {
+  const currentUserId = useAuthStore((s) => s.user?.id ?? null);
   const [users, setUsers] = useState<User[]>([]);
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
@@ -258,11 +260,17 @@ export default function AdminUsersPage() {
                   <td className="px-4 py-3 text-gray-400 text-xs">{formatDate(user.createdAt)}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleRoleChange(user)} className="gap-1">
+                      <Button size="sm" variant="outline" onClick={() => handleRoleChange(user)}
+                        disabled={currentUserId === user.id}
+                        title={currentUserId === user.id ? "Không thể tự đổi vai trò" : undefined}
+                        className="gap-1 disabled:opacity-40 disabled:cursor-not-allowed">
                         <UserCog className="w-3 h-3" />
                         Đổi vai trò
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleLock(user)} className="gap-1">
+                      <Button size="sm" variant="outline" onClick={() => handleLock(user)}
+                        disabled={currentUserId === user.id}
+                        title={currentUserId === user.id ? "Không thể tự khóa tài khoản của mình" : undefined}
+                        className="gap-1 disabled:opacity-40 disabled:cursor-not-allowed">
                         {user.locked ? <Unlock className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                         {user.locked ? "Mở khóa" : "Khóa"}
                       </Button>
@@ -308,10 +316,16 @@ export default function AdminUsersPage() {
               )}
               <p className="mt-1 text-[11px] text-gray-400">Ngày tạo: {formatDate(user.createdAt)}</p>
               <div className="mt-3 flex gap-2">
-                <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => handleRoleChange(user)}>
+                <Button size="sm" variant="outline"
+                  disabled={currentUserId === user.id}
+                  className="flex-1 gap-1 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={() => handleRoleChange(user)}>
                   <UserCog className="w-3 h-3" />Đổi vai trò
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs" onClick={() => handleLock(user)}>
+                <Button size="sm" variant="outline"
+                  disabled={currentUserId === user.id}
+                  className="flex-1 gap-1 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                  onClick={() => handleLock(user)}>
                   {user.locked ? <Unlock className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                   {user.locked ? "Mở khóa" : "Khóa"}
                 </Button>
