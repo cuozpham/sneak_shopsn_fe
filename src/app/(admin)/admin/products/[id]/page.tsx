@@ -199,12 +199,39 @@ export default function AdminProductFormPage() {
   const clearColorImageByName = (targetColor: string) => {
     const key = normalizeColor(targetColor);
     if (!key) return;
+    const removed: string[] = [];
     setVariants((curr) => curr.map((variant) => ({
       ...variant,
-      colors: variant.colors.map((color) =>
-        normalizeColor(color.color) === key ? { ...color, imageUrl: "" } : color
-      ),
+      colors: variant.colors.map((color) => {
+        if (normalizeColor(color.color) === key) {
+          if (color.imageUrl) removed.push(color.imageUrl);
+          return { ...color, imageUrl: "" };
+        }
+        return color;
+      }),
     })));
+    removed.forEach((url) => syncRemoveElsewhere(url, "variant"));
+  };
+
+  const syncRemoveElsewhere = (
+    url: string,
+    from: "cover" | "media" | "variant"
+  ) => {
+    if (!url) return;
+    if (from !== "cover") {
+      setForm((f) => (f.coverImageUrl === url ? { ...f, coverImageUrl: "" } : f));
+    }
+    if (from !== "media") {
+      setMedia((curr) => curr.filter((m) => m.url !== url));
+    }
+    if (from !== "variant") {
+      setVariants((curr) => curr.map((variant) => ({
+        ...variant,
+        colors: variant.colors.map((color) =>
+          color.imageUrl === url ? { ...color, imageUrl: "" } : color
+        ),
+      })));
+    }
   };
 
   const uploadOne = async (file: File) => imagesApi.upload(file);
@@ -532,7 +559,11 @@ export default function AdminProductFormPage() {
                   <img src={form.coverImageUrl} alt="Ảnh bìa" className="h-full w-full object-cover" />
                 </div>
                 <div className="flex justify-end border-t px-4 py-2">
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setForm((f) => ({ ...f, coverImageUrl: "" }))}>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => {
+                    const url = form.coverImageUrl;
+                    setForm((f) => ({ ...f, coverImageUrl: "" }));
+                    if (url) syncRemoveElsewhere(url, "cover");
+                  }}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
@@ -604,7 +635,11 @@ export default function AdminProductFormPage() {
                     </span>
                     <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 bg-black/30 transition">
                       <GripVertical className="w-4 h-4 text-white" />
-                      <button type="button" onClick={() => setMedia((m) => m.filter((_, i) => i !== index))}
+                      <button type="button" onClick={() => {
+                        const removedUrl = media[index]?.url;
+                        setMedia((m) => m.filter((_, i) => i !== index));
+                        if (removedUrl) syncRemoveElsewhere(removedUrl, "media");
+                      }}
                         className="rounded-full bg-red-500 p-1 text-white">
                         <X className="w-3 h-3" />
                       </button>
