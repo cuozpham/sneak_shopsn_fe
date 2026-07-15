@@ -179,7 +179,10 @@ export default function AdminProductsPage() {
         <table className="min-w-[920px] w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
-              {["Ảnh", "Tên sản phẩm", "Giá", "Tồn kho", "Đánh giá", "Trạng thái", "Ngày tạo", ""].map((h) => (
+              {(showFeatured
+                ? ["Vị trí", "Ảnh", "Tên sản phẩm", "Giá", "Tồn kho", "Đánh giá", "Trạng thái", "Ngày tạo", ""]
+                : ["Ảnh", "Tên sản phẩm", "Giá", "Tồn kho", "Đánh giá", "Trạng thái", "Ngày tạo", ""]
+              ).map((h) => (
                 <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-gray-500">{h}</th>
               ))}
             </tr>
@@ -187,17 +190,22 @@ export default function AdminProductsPage() {
           <tbody>
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i}><td colSpan={8} className="px-4 py-3"><Skeleton className="h-5" /></td></tr>
+                <tr key={i}><td colSpan={showFeatured ? 9 : 8} className="px-4 py-3"><Skeleton className="h-5" /></td></tr>
               ))
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-12 text-gray-400">
+                <td colSpan={showFeatured ? 9 : 8} className="text-center py-12 text-gray-400">
                   {showDeleted ? "Thùng rác đang trống" : "Không tìm thấy sản phẩm"}
                 </td>
               </tr>
             ) : (
               products.map((p) => (
                 <tr key={p.id} className={`border-b last:border-0 hover:bg-gray-50 ${p.deleted ? "opacity-60" : ""}`}>
+                  {showFeatured && (
+                    <td className="px-4 py-3 text-sm font-semibold text-amber-600">
+                      {p.featuredOrder ?? "—"}
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100">
                       {p.coverImageUrl ? (
