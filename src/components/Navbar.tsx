@@ -214,12 +214,46 @@ export default function Navbar() {
     router.push("/");
   };
 
-  const MAX_VISIBLE_CATEGORIES = 6;
-
   const categoryTree = buildCategoryTree(categories);
   const topCategories = categoryTree.filter((c) => c.parentId == null);
-  const visibleTopCategories = topCategories.slice(0, MAX_VISIBLE_CATEGORIES);
-  const hasMoreCategories = topCategories.length > MAX_VISIBLE_CATEGORIES;
+  const [maxVisibleCats, setMaxVisibleCats] = useState(topCategories.length);
+  const categoryBarRef = useRef<HTMLDivElement>(null);
+  const measureBarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = categoryBarRef.current;
+    const measure = measureBarRef.current;
+    if (!container || !measure || topCategories.length === 0) return;
+
+    const compute = () => {
+      const containerWidth = container.clientWidth;
+      const items = Array.from(measure.querySelectorAll<HTMLElement>("[data-cat-item]"));
+      const moreEl = measure.querySelector<HTMLElement>("[data-more-item]");
+      const gap = 12;
+      const moreWidth = moreEl ? moreEl.offsetWidth : 0;
+
+      let used = 0;
+      let count = 0;
+      for (let i = 0; i < items.length; i++) {
+        const w = items[i].offsetWidth;
+        const nextUsed = used + (count > 0 ? gap : 0) + w;
+        const needsMoreAfter = i < items.length - 1;
+        const budget = needsMoreAfter ? containerWidth - moreWidth - gap : containerWidth;
+        if (nextUsed > budget) break;
+        used = nextUsed;
+        count++;
+      }
+      setMaxVisibleCats(Math.max(1, count));
+    };
+
+    compute();
+    const obs = new ResizeObserver(compute);
+    obs.observe(container);
+    return () => obs.disconnect();
+  }, [topCategories]);
+
+  const visibleTopCategories = topCategories.slice(0, maxVisibleCats);
+  const hasMoreCategories = topCategories.length > maxVisibleCats;
 
   const activeRoot = topCategories.find((c) => c.id === activeRootId) ?? null;
   const activeRootChildren = activeRoot?.children ?? [];
@@ -323,7 +357,27 @@ export default function Navbar() {
               </div>
             </Link>
 
-            <div className={cn("hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 whitespace-nowrap lg:flex", hasMoreCategories && "pr-4")}>
+            <div
+              ref={measureBarRef}
+              aria-hidden
+              className="pointer-events-none invisible absolute -left-[9999px] top-0 hidden items-center gap-3 whitespace-nowrap lg:flex"
+            >
+              {topCategories.map((c) => (
+                <span
+                  key={`m-${c.id}`}
+                  data-cat-item
+                  className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium uppercase tracking-[0.1em]"
+                >
+                  {c.name}
+                  {c.children.length > 0 && <ChevronDown className="h-3.5 w-3.5" />}
+                </span>
+              ))}
+              <span data-more-item className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium uppercase tracking-[0.1em]">
+                Xem thêm
+                <ChevronRight className="h-3.5 w-3.5" />
+              </span>
+            </div>
+            <div ref={categoryBarRef} className={cn("hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-3 whitespace-nowrap lg:flex", hasMoreCategories && "pr-4")}>
               {visibleTopCategories.map((category) => {
                 const hasChildren = category.children.length > 0;
                 const active = pathname === "/products" && activeCategorySlug === category.slug;
