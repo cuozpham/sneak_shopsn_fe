@@ -334,11 +334,23 @@ export default function AdminProductFormPage() {
   };
 
   const removeColor = (vi: number, ci: number) => {
+    const removedUrl = variants[vi]?.colors[ci]?.imageUrl || "";
+    const removedName = variants[vi]?.colors[ci]?.color || "";
     setVariants((curr) => curr.map((v, i) => {
       if (i !== vi) return v;
       const next = v.colors.filter((_, j) => j !== ci);
       return { ...v, colors: next.length ? next : [emptyColor()] };
     }));
+    // If no other color with same name still has the URL → treat as full delete
+    if (removedUrl) {
+      const stillUsed = variants.some((v, i) =>
+        v.colors.some((c, j) => {
+          if (i === vi && j === ci) return false;
+          return c.imageUrl === removedUrl && normalizeColor(c.color) === normalizeColor(removedName);
+        })
+      );
+      if (!stillUsed) syncRemoveElsewhere(removedUrl, "variant");
+    }
   };
 
   const uploadColorImage = async (vi: number, ci: number, file?: File) => {
