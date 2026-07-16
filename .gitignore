@@ -34,3 +34,6 @@ build/
 be/
 tsconfig.tsbuildinfo
 node_modules
+.next/
+node_modules/
+*.pack
