@@ -22,6 +22,10 @@ export const metadata: Metadata = {
         "sneaker Nike Adidas",
         "MANDRO",
     ],
+    icons: {
+        icon: "/favicon.ico",
+        apple: "/apple-touch-icon.png",
+    },
     robots: {
         index: true,
         follow: true,
