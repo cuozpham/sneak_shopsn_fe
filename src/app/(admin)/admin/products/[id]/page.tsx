@@ -2,12 +2,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import { toast } from "sonner";
-import { ArrowLeft, Eye, EyeOff, GripVertical, ImagePlus, Plus, Trash2, Upload, X } from "lucide-react";
+import dynamic from "next/dynamic";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+const MDEditor = dynamic(() => import("@uiw/react-md-editor").then((mod) => mod.default), { ssr: false });import { toast } from "sonner";
+import { ArrowLeft, GripVertical, ImagePlus, Plus, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { categoriesApi } from "@/lib/api/categories";
 import { imagesApi } from "@/lib/api/images";
@@ -100,15 +101,15 @@ export default function AdminProductFormPage() {
   const coverInputRef      = useRef<HTMLInputElement>(null);
   const galleryInputRef    = useRef<HTMLInputElement>(null);
   const sizeGuideImgRef    = useRef<HTMLInputElement>(null);
+  const descriptionImgRef  = useRef<HTMLInputElement>(null);
   const sizeGuideTextareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [form, setForm] = useState({
     name: "", description: "",
     coverImageUrl: "", sizeGuideNote: "",
     status: "active", categoryIds: [] as number[],
     discountPercent: 0,
   });
-  const [sizeGuidePreview, setSizeGuidePreview] = useState(false);
   const [media,    setMedia]    = useState<MediaDraft[]>([]);
   const [variants, setVariants] = useState<VariantDraft[]>([emptyVariant()]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -117,6 +118,7 @@ export default function AdminProductFormPage() {
   const [uploadingCover,     setUploadingCover]     = useState(false);
   const [uploadingGallery,   setUploadingGallery]   = useState(false);
   const [uploadingSizeImg,   setUploadingSizeImg]   = useState(false);
+  const [uploadingDescriptionImg, setUploadingDescriptionImg] = useState(false);
   const [dragIndex,       setDragIndex]       = useState<number | null>(null);
   const submitLockRef = useRef(false);
 
@@ -236,6 +238,34 @@ export default function AdminProductFormPage() {
   };
 
   const uploadOne = async (file: File) => imagesApi.upload(file);
+  const handleDescriptionImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingDescriptionImg(true);
+    try {
+      const url = await uploadOne(file);
+      const ta = descriptionTextareaRef.current;
+      const insert = `\n![](${url})\n`;
+      if (ta) {
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? 0;
+        const current = form.description;
+        const next = current.slice(0, start) + insert + current.slice(end);
+        setForm((f) => ({ ...f, description: next }));
+        setTimeout(() => {
+          ta.selectionStart = ta.selectionEnd = start + insert.length;
+          ta.focus();
+        }, 0);
+      } else {
+        setForm((f) => ({ ...f, description: f.description + insert }));
+      }
+      toast.success("Đã chèn ảnh");
+    } catch { toast.error("Không tải được ảnh"); }
+    finally {
+      setUploadingDescriptionImg(false);
+      e.target.value = "";
+    }
+  };
 
   const handleSizeGuideImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -440,61 +470,57 @@ export default function AdminProductFormPage() {
           </div>
 
 
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Mô tả</p>
-            <Textarea rows={4} value={form.description} onChange={setField("description")} />
+          <div className="space-y-1" data-color-mode="light">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Mô tả (Markdown)</p>
+              <input ref={descriptionImgRef} type="file" accept="image/*" className="hidden" onChange={handleDescriptionImageUpload} />
+              <Button
+                  type="button" variant="ghost" size="sm"
+                  onClick={() => descriptionImgRef.current?.click()}
+                  disabled={uploadingDescriptionImg}
+                  className="gap-1 text-gray-500"
+              >
+                <ImagePlus className="w-4 h-4" />
+                {uploadingDescriptionImg ? "Đang tải..." : "Chèn ảnh"}
+              </Button>
+            </div>
+            <MDEditor
+                value={form.description}
+                onChange={(val) => setForm((f) => ({ ...f, description: val ?? "" }))}
+                height={220}
+                preview="edit"
+                textareaProps={{ ref: descriptionTextareaRef, maxLength: 2000 }}
+            />
+            <p className={`text-xs text-right ${form.description.length > 1900 ? "text-orange-500" : "text-gray-400"}`}>
+              {form.description.length}/2000
+            </p>
           </div>
 
           {/* Ghi chú size — Markdown */}
-          <div className="space-y-1">
+          <div className="space-y-1" data-color-mode="light">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">Ghi chú size (Markdown)</p>
-              <div className="flex items-center gap-1">
-                {!sizeGuidePreview && (
-                  <>
-                    <input ref={sizeGuideImgRef} type="file" accept="image/*" className="hidden" onChange={handleSizeGuideImageUpload} />
-                    <Button
-                      type="button" variant="ghost" size="sm"
-                      onClick={() => sizeGuideImgRef.current?.click()}
-                      disabled={uploadingSizeImg}
-                      className="gap-1 text-gray-500"
-                    >
-                      <ImagePlus className="w-4 h-4" />
-                      {uploadingSizeImg ? "Đang tải..." : "Chèn ảnh"}
-                    </Button>
-                  </>
-                )}
-                <Button
+              <input ref={sizeGuideImgRef} type="file" accept="image/*" className="hidden" onChange={handleSizeGuideImageUpload} />
+              <Button
                   type="button" variant="ghost" size="sm"
-                  onClick={() => setSizeGuidePreview((v) => !v)}
+                  onClick={() => sizeGuideImgRef.current?.click()}
+                  disabled={uploadingSizeImg}
                   className="gap-1 text-gray-500"
-                >
-                  {sizeGuidePreview ? <><EyeOff className="w-4 h-4" />Sửa</> : <><Eye className="w-4 h-4" />Xem trước</>}
-                </Button>
-              </div>
+              >
+                <ImagePlus className="w-4 h-4" />
+                {uploadingSizeImg ? "Đang tải..." : "Chèn ảnh"}
+              </Button>
             </div>
-            {sizeGuidePreview ? (
-              <div className="min-h-20 rounded-lg border bg-gray-50 px-4 py-3 prose prose-sm max-w-none text-sm">
-                {form.sizeGuideNote
-                  ? <ReactMarkdown>{form.sizeGuideNote}</ReactMarkdown>
-                  : <span className="text-gray-400 italic">Chưa có nội dung</span>
-                }
-              </div>
-            ) : (
-              <>
-                <Textarea
-                  ref={sizeGuideTextareaRef}
-                  rows={5}
-                  maxLength={2000}
-                  value={form.sizeGuideNote}
-                  onChange={setField("sizeGuideNote")}
-                  className={`font-mono text-sm ${form.sizeGuideNote.length > 1900 ? "border-orange-400 focus-visible:border-orange-400" : ""}`}
-                />
-                <p className={`text-xs text-right ${form.sizeGuideNote.length > 1900 ? "text-orange-500" : "text-gray-400"}`}>
-                  {form.sizeGuideNote.length}/2000
-                </p>
-              </>
-            )}
+            <MDEditor
+                value={form.sizeGuideNote}
+                onChange={(val) => setForm((f) => ({ ...f, sizeGuideNote: val ?? "" }))}
+                height={260}
+                preview="edit"
+                textareaProps={{ ref: sizeGuideTextareaRef, maxLength: 2000 }}
+            />
+            <p className={`text-xs text-right ${form.sizeGuideNote.length > 1900 ? "text-orange-500" : "text-gray-400"}`}>
+              {form.sizeGuideNote.length}/2000
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
