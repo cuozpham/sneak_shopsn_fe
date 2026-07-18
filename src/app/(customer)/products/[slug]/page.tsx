@@ -669,9 +669,28 @@ export default function ProductDetailPage() {
       </div>
 
       {product.description && (
-        <div className="mt-6 font-sans sm:mt-10" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
-          <h3 className="mb-2 text-sm font-semibold leading-snug sm:text-lg">Mô tả sản phẩm</h3>
-          <p className="whitespace-pre-line text-[12px] font-normal leading-relaxed text-gray-600 sm:text-sm">{product.description}</p>        </div>
+          <div className="mt-6 font-sans sm:mt-10" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+            <h3 className="mb-2 text-sm font-semibold leading-snug sm:text-lg">Mô tả sản phẩm</h3>
+            <div className="prose prose-sm max-w-none text-[12px] font-normal leading-relaxed text-gray-600 sm:text-sm">
+              <ReactMarkdown
+                  components={{
+                    img: ({ src, alt }) => {
+                      const url = typeof src === "string" ? toFrontendImageUrl(src) : "";
+                      return (
+                          <img
+                              src={url}
+                              alt={alt ?? ""}
+                              onClick={() => url && setPreviewMedia({ url, type: "image", title: alt || "Ảnh mô tả" })}
+                              className="my-3 block h-[350px] w-full max-w-none cursor-zoom-in rounded-lg object-cover object-center transition duration-200 hover:opacity-90 sm:h-[500px]"
+                          />
+                      );
+                    },
+                  }}
+              >
+                {product.description}
+              </ReactMarkdown>
+            </div>
+          </div>
       )}
 
       {product.sizeGuideNote && (
