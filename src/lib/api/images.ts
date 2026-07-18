@@ -1,16 +1,32 @@
-import { api } from "@/lib/api";
+const CLOUDINARY_CLOUD_NAME = "dtgfmscgz";
+const CLOUDINARY_UPLOAD_PRESET = "mandro_shop";
+
+async function uploadToCloudinary(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+  );
+
+  if (!res.ok) {
+    throw new Error("Upload lên Cloudinary thất bại");
+  }
+
+  const data = await res.json();
+  return data.secure_url as string;
+}
 
 export const imagesApi = {
   upload: async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await api.post<{ url: string }>("/api/admin/images/upload", formData);
-    return res.data.url;
+    return uploadToCloudinary(file);
   },
   uploadMultiple: async (files: File[]): Promise<string[]> => {
-    const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
-    const res = await api.post<{ urls: string[] }>("/api/admin/images/upload-multiple", formData);
-    return res.data.urls;
+    return Promise.all(files.map((file) => uploadToCloudinary(file)));
   },
 };
