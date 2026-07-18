@@ -37,3 +37,4 @@ node_modules
 .next/
 node_modules/
 *.pack
+.DS_Store
