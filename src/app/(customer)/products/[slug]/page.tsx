@@ -672,7 +672,14 @@ export default function ProductDetailPage() {
       {product.description && (
           <div className="mt-6 font-sans sm:mt-10" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
             <h3 className="mb-2 text-sm font-semibold leading-snug sm:text-lg">Mô tả sản phẩm</h3>
-            <div className="prose prose-sm max-w-none text-[12px] font-normal leading-relaxed text-gray-600 sm:text-sm">
+            <div className="prose prose-sm max-w-none text-[13px] leading-[1.8] text-gray-800 sm:text-[15px]
+              prose-headings:font-semibold prose-headings:text-gray-900 prose-headings:mt-4 prose-headings:mb-2
+              prose-p:my-1.5 prose-p:text-gray-800
+              prose-strong:font-semibold prose-strong:text-gray-900
+              prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5
+              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+              prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold
+              prose-hr:my-3 prose-hr:border-gray-200">
               <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
@@ -696,7 +703,15 @@ export default function ProductDetailPage() {
       )}
 
       {product.sizeGuideNote && (
-        <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[12px] text-gray-700 sm:mt-6 sm:p-5 sm:text-sm [&_img]:my-3 [&_img]:block [&_img]:h-[350px] [&_img]:w-full [&_img]:max-w-none [&_img]:cursor-zoom-in [&_img]:rounded-lg [&_img]:object-cover [&_img]:object-center [&_img]:transition [&_img]:duration-200 [&_img]:hover:opacity-90 sm:[&_img]:h-[500px] [&_p:has(img)]:my-0 [&_p:has(img)]:overflow-hidden [&_p:has(img)]:rounded-lg">
+          <div className="prose prose-sm mt-4 max-w-none rounded-lg bg-gray-50 p-3 text-[13px] leading-[1.8] text-gray-800 sm:mt-6 sm:p-5 sm:text-[15px]
+          prose-headings:font-semibold prose-headings:text-gray-900 prose-headings:mt-4 prose-headings:mb-2
+          prose-p:my-1.5 prose-p:text-gray-800
+          prose-strong:font-semibold prose-strong:text-gray-900
+          prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5
+          prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+          prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold
+          prose-hr:my-3 prose-hr:border-gray-200
+          [&_img]:my-3 [&_img]:block [&_img]:h-[350px] [&_img]:w-full [&_img]:max-w-none [&_img]:cursor-zoom-in [&_img]:rounded-lg [&_img]:object-cover [&_img]:object-center [&_img]:transition [&_img]:duration-200 [&_img]:hover:opacity-90 sm:[&_img]:h-[500px] [&_p:has(img)]:my-0 [&_p:has(img)]:overflow-hidden [&_p:has(img)]:rounded-lg">
           <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
           <ReactMarkdown
               remarkPlugins={[remarkGfm]}
