@@ -10,6 +10,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Star, Minus, Plus, ShoppingBag, Share2, MessageCircle, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import VideoThumb from "@/components/VideoThumb";
 import { productsApi } from "@/lib/api/products";
 import { cartApi } from "@/lib/api/cart";
@@ -681,7 +682,7 @@ export default function ProductDetailPage() {
               prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold
               prose-hr:my-3 prose-hr:border-gray-200">
               <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
+                  remarkPlugins={[remarkGfm, remarkBreaks]}
                   components={{
                     img: ({ src, alt }) => {
                       const url = typeof src === "string" ? toFrontendImageUrl(src) : "";
@@ -712,26 +713,26 @@ export default function ProductDetailPage() {
           prose-table:text-sm prose-th:bg-gray-50 prose-th:font-semibold
           prose-hr:my-3 prose-hr:border-gray-200
           [&_img]:my-3 [&_img]:block [&_img]:h-[350px] [&_img]:w-full [&_img]:max-w-none [&_img]:cursor-zoom-in [&_img]:rounded-lg [&_img]:object-cover [&_img]:object-center [&_img]:transition [&_img]:duration-200 [&_img]:hover:opacity-90 sm:[&_img]:h-[500px] [&_p:has(img)]:my-0 [&_p:has(img)]:overflow-hidden [&_p:has(img)]:rounded-lg">
-          <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
-          <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                img: ({ src, alt }) => {
-                  const url = typeof src === "string" ? toFrontendImageUrl(src) : "";
-                  return (
-                      <img
-                          src={url}
-                          alt={alt ?? ""}
-                          onClick={() => url && setPreviewMedia({ url, type: "image", title: alt || "Ảnh mô tả" })}
-                          className="my-3 block h-[350px] w-full max-w-none cursor-zoom-in rounded-lg object-cover object-center transition duration-200 hover:opacity-90 sm:h-[500px]"
-                      />
-                  );
-                },
-              }}
-          >
-            {product.sizeGuideNote}
-          </ReactMarkdown>
-        </div>
+            <p className="mb-1.5 font-medium text-gray-900">📏 Hướng dẫn chọn size</p>
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks]}
+                components={{
+                  img: ({ src, alt }) => {
+                    const url = typeof src === "string" ? toFrontendImageUrl(src) : "";
+                    return (
+                        <img
+                            src={url}
+                            alt={alt ?? ""}
+                            onClick={() => url && setPreviewMedia({ url, type: "image", title: alt || "Ảnh mô tả" })}
+                            className="my-3 block h-[350px] w-full max-w-none cursor-zoom-in rounded-lg object-cover object-center transition duration-200 hover:opacity-90 sm:h-[500px]"
+                        />
+                    );
+                  },
+                }}
+            >
+              {product.sizeGuideNote}
+            </ReactMarkdown>
+          </div>
       )}
 
       {/* Reviews */}
