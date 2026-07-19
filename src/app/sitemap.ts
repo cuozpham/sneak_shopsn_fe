@@ -22,8 +22,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             process.env.APP_BACKEND_BASE_URL ||
             "https://sneakshop-production.up.railway.app";
 
-        const res = await fetch(`${backendBaseUrl}/api/products?status=active&size=1000`);        if (!res.ok) return staticUrls;
-
+        const res = await fetch(`${backendBaseUrl}/api/products?status=active&size=1000&page=0&sort=newest`);
+        if (!res.ok) {
+            console.error('Sitemap: API tra ve loi', res.status, await res.text());
+            return staticUrls;
+        }
         const data = await res.json();
         const products = data.result?.content ?? data.content ?? [];
 
