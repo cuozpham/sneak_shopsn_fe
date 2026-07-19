@@ -11,8 +11,8 @@ async function getProduct(slug: string) {
         cache: "no-store",
     });
     if (!res.ok) return null;
-    const data = await res.json();
-    return data.result;
+    const json = await res.json();
+    return json.data;   // ← ĐÚNG, khớp với cấu trúc {"success":true,"data":{...}}
 }
 
 export async function generateMetadata({

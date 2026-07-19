@@ -28,8 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             return staticUrls;
         }
         const data = await res.json();
-        const products = data.result?.content ?? data.content ?? [];
-
+        const products = data.data?.content ?? [];
         const productUrls: MetadataRoute.Sitemap = products.map((product: any) => ({
             url: `https://mandro.net/products/${product.slug}`,
             lastModified: new Date(product.updatedAt ?? Date.now()),
