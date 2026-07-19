@@ -11,15 +11,17 @@ const googleClientId =
 export const metadata: Metadata = {
     metadataBase: new URL("https://mandro.net"),
     title: {
-        default: "MANDRO - Giày Sneaker Chính Hãng",
+        default: "MANDRO - Giày Tây Nam Cao Cấp, Loafer, Giày Lười Công Sở",
         template: "%s | MANDRO",
     },
-    description: "Cửa hàng giày sneaker chính hãng. Đa dạng mẫu mã, giao hàng toàn quốc.",
+    description: "MANDRO - Giày tây nam, loafer, giày lười công sở da thật cao cấp. Moccasin, Derby, Mules, Sandal. Giao hàng toàn quốc.",
     keywords: [
-        "giày sneaker",
-        "giày sneaker nam",
-        "giày thể thao nam chính hãng",
-        "sneaker Nike Adidas",
+        "giày tây nam",
+        "giày lười nam",
+        "loafer nam",
+        "giày derby",
+        "giày công sở nam",
+        "giày da nam cao cấp",
         "MANDRO",
     ],
     icons: {
@@ -38,8 +40,8 @@ export const metadata: Metadata = {
         },
     },
     openGraph: {
-        title: "MANDRO - Giày Sneaker Chính Hãng",
-        description: "Cửa hàng giày sneaker chính hãng. Đa dạng mẫu mã, giao hàng toàn quốc.",
+        title: "MANDRO - Giày Tây Nam Cao Cấp, Loafer, Giày Lười Công Sở",
+        description: "Giày tây nam, loafer, giày lười công sở da thật cao cấp. Giao hàng toàn quốc.",
         url: "https://mandro.net",
         siteName: "MANDRO",
         images: [
@@ -54,13 +56,10 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "MANDRO - Giày Sneaker Chính Hãng",
-        description: "Cửa hàng giày sneaker chính hãng.",
+        title: "MANDRO - Giày Tây Nam Cao Cấp, Loafer, Giày Lười Công Sở",
+        description: "Giày tây nam, loafer, giày lười công sở da thật cao cấp.",
         images: ["/og-image.jpg"],
     },
-    // verification: {
-    //   google: "dán mã xác minh Google Search Console vào đây sau",
-    // },
 };
 
 const organizationSchema = {
@@ -69,7 +68,7 @@ const organizationSchema = {
     name: "MANDRO",
     url: "https://mandro.net",
     logo: "https://mandro.net/og-image.jpg",
-    description: "Cửa hàng giày sneaker chính hãng",
+    description: "Cửa hàng giày tây nam, loafer, giày lười công sở da thật cao cấp",
     address: {
         "@type": "PostalAddress",
         streetAddress: "Số nhà 40, ngõ 438, đường La Phù, Thôn Thắng Lợi, Xã An Khánh",
