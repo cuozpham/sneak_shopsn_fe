@@ -17,8 +17,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
 
     try {
-        const res = await fetch('https://api.mandro.net/api/products?status=active&size=1000');
-        if (!res.ok) return staticUrls;
+        const backendBaseUrl =
+            process.env.NEXT_PUBLIC_API_URL ||
+            process.env.APP_BACKEND_BASE_URL ||
+            "https://sneakshop-production.up.railway.app";
+
+        const res = await fetch(`${backendBaseUrl}/api/products?status=active&size=1000`);        if (!res.ok) return staticUrls;
 
         const data = await res.json();
         const products = data.content ?? data;

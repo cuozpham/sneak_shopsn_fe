@@ -37,9 +37,6 @@ export const metadata: Metadata = {
             "max-video-preview": -1,
         },
     },
-    alternates: {
-        canonical: "https://mandro.net",
-    },
     openGraph: {
         title: "MANDRO - Giày Sneaker Chính Hãng",
         description: "Cửa hàng giày sneaker chính hãng. Đa dạng mẫu mã, giao hàng toàn quốc.",
