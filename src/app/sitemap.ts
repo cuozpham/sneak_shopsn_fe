@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const res = await fetch(`${backendBaseUrl}/api/products?status=active&size=1000`);        if (!res.ok) return staticUrls;
 
         const data = await res.json();
-        const products = data.content ?? data;
+        const products = data.result?.content ?? data.content ?? [];
 
         const productUrls: MetadataRoute.Sitemap = products.map((product: any) => ({
             url: `https://mandro.net/products/${product.slug}`,
